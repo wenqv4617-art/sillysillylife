@@ -1,0 +1,4782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mylife · 人生模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        .mylife-app {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background: #f5f5f5;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .app-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .app-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .page {
+            display: none;
+            height: 100%;
+        }
+        .page.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .home-page {
+            padding: 0;
+        }
+
+        .home-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px 0;
+        }
+
+        .settings-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            transition: all 0.15s;
+        }
+        .settings-btn:active {
+            background: #e0e0e0;
+            transform: scale(0.92);
+        }
+
+        .home-title-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .app-icon {
+            width: 72px;
+            height: 72px;
+            margin: 20px auto 16px;
+            background: #2a2a2a;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #f5f5f5;
+            cursor: pointer;
+            transition: transform 0.15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .app-icon:active {
+            transform: scale(0.95);
+        }
+
+        .app-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 300;
+            color: #2a2a2a;
+            margin-bottom: 32px;
+            letter-spacing: 6px;
+        }
+
+        .sim-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0 20px;
+        }
+
+        .sim-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.15s;
+        }
+        .sim-card:active {
+            background: #f0f0f0;
+            transform: scale(0.99);
+        }
+
+        .sim-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .sim-card h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+        .sim-edit-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #555;
+        }
+        .sim-edit-btn:active {
+            background: #ddd;
+        }
+
+        .sim-card p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .sim-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .new-sim-btn {
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 16px 20px 32px;
+            transition: all 0.15s;
+        }
+        .new-sim-btn:active {
+            background: #1a1a1a;
+            transform: scale(0.98);
+        }
+
+        .editor-page {
+            background: #fafafa;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 16px 8px;
+        }
+        .editor-back {
+            font-size: 24px;
+            cursor: pointer;
+            color: #2a2a2a;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .editor-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+            color: #2a2a2a;
+        }
+        .editor-delete-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e53935;
+    transition: all 0.15s;
+}
+.editor-delete-btn:active {
+    background: #ffebee;
+    transform: scale(0.92);
+}
+
+        .wizard-steps {
+            display: flex;
+            gap: 6px;
+            padding: 12px 20px;
+        }
+        .step-dot {
+            flex: 1;
+            height: 3px;
+            background: #ddd;
+            border-radius: 3px;
+        }
+        .step-dot.active {
+            background: #2a2a2a;
+        }
+        .step-dot.completed {
+            background: #888;
+        }
+
+        .wizard-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 15px;
+            color: #1a1a1a;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .status-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .status-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 0.5px solid #eee;
+        }
+        .status-row-item label {
+            font-size: 14px;
+            color: #555;
+            margin: 0;
+        }
+        .status-row-item input {
+            width: 100px;
+            padding: 8px 12px;
+            text-align: right;
+        }
+
+        .npc-collapsed-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .npc-collapsed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .npc-collapsed-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .npc-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #2a2a2a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .npc-collapsed-info h4 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+        .npc-collapsed-info p {
+            font-size: 12px;
+            color: #888;
+        }
+        .npc-collapsed-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .npc-expand-icon {
+            font-size: 18px;
+            color: #999;
+            transition: transform 0.2s;
+        }
+        .npc-collapsed-card.expanded .npc-expand-icon {
+            transform: rotate(90deg);
+        }
+        .npc-delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .npc-expanded-content {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 0.5px solid #eee;
+        }
+        .npc-collapsed-card.expanded .npc-expanded-content {
+            display: block;
+        }
+
+        .add-npc-btn {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            color: #555;
+            cursor: pointer;
+            margin-top: 8px;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .add-npc-btn:active {
+            background: #f0f0f0;
+        }
+
+        .relation-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .relation-node {
+            background: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #2a2a2a;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .relation-node.selected {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .relation-modal, .save-load-modal, .edit-relation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .relation-modal.active, .save-load-modal.active, .edit-relation-modal.active {
+            display: flex;
+        }
+        .relation-modal-content, .save-load-content, .edit-relation-content {
+            width: 320px;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .save-load-content h3, .edit-relation-content h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .save-load-content input, .edit-relation-content input {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 14px;
+            background: #f5f5f5;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        .save-item {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .save-item-info span {
+            display: block;
+            font-size: 13px;
+            color: #555;
+        }
+        .load-save-btn, .delete-save-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 6px;
+        }
+
+        .relation-modal-content h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .relation-modal-content input {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 14px;
+            background: #f5f5f5;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        .relation-modal-actions, .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .modal-btn.primary {
+            background: #2a2a2a;
+            color: white;
+        }
+        .modal-btn.secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .relation-lines {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            min-height: 60px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .relation-item-new {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 8px;
+            border-bottom: 0.5px solid #eee;
+            gap: 8px;
+        }
+        .relation-item-new:last-child {
+            border-bottom: none;
+        }
+        .relation-name-left, .relation-name-right {
+            font-size: 14px;
+            color: #2a2a2a;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+        .relation-desc-middle {
+            flex: 1;
+            text-align: center;
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.15s;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .relation-desc-middle:active {
+            background: #e8e8e8;
+        }
+        .relation-delete-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
+            background: #f0f0f0;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #999;
+            flex-shrink: 0;
+        }
+
+        .event-item {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .wizard-nav {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+            background: #fafafa;
+        }
+        .wizard-btn {
+            flex: 1;
+            background: white;
+            border: none;
+            border-radius: 30px;
+            padding: 14px;
+            font-size: 15px;
+            color: #2a2a2a;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .wizard-btn.primary {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .play-page {
+            background: #fafafa;
+        }
+
+        .play-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #fafafa;
+        }
+        .exit-play-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2a2a2a;
+        }
+        .time-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: #fafafa;
+            flex: 1;
+        }
+        .time-display {
+            font-size: 15px;
+            font-weight: 500;
+            color: #2a2a2a;
+        }
+        .time-settings-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .time-settings-panel {
+            display: none;
+            padding: 16px;
+            background: white;
+            margin: 0 12px 12px;
+            border-radius: 16px;
+        }
+        .time-settings-panel.active {
+            display: block;
+        }
+
+        /* 行动点信息已移除 */
+
+        .time-selector {
+            display: flex;
+            gap: 10px;
+        }
+        .time-selector select {
+            flex: 1;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .advance-btn {
+            background: #2a2a2a;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .save-load-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .save-load-group .modal-btn {
+            flex: 1;
+            padding: 12px;
+        }
+
+        .event-stream {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .system-message {
+            text-align: center;
+            padding: 8px 16px;
+            color: #888;
+            font-size: 13px;
+            max-width: 90%;
+            margin: 0 auto;
+        }
+
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+        .message-row.left {
+            align-items: flex-start;
+            align-self: flex-start;
+        }
+        .message-row.right {
+            align-items: flex-end;
+            align-self: flex-end;
+        }
+
+        .name-tag {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+            margin-left: 8px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .name-tag:active {
+            background: #e8e8e8;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .message-row.left .bubble {
+            border-top-left-radius: 6px;
+        }
+        .message-row.right .bubble {
+            border-top-right-radius: 6px;
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .input-area {
+            padding: 12px 16px;
+            background: #fafafa;
+        }
+
+        .input-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .input-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            background: #f0f0f0;
+            color: #666;
+            cursor: pointer;
+        }
+        .input-tab.active {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: #f0f0f0;
+            border: none;
+            color: #555;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .action-btn:active {
+            background: #ddd;
+            transform: scale(0.95);
+        }
+
+        .input-field {
+            flex: 1;
+            background: white;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 16px;
+            font-size: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            min-width: 0;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: #2a2a2a;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .status-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .status-modal.active {
+            display: flex;
+        }
+        .status-card {
+            width: 320px;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .status-card h3 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .status-section {
+            margin-bottom: 16px;
+        }
+        .status-section h4 {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+        .stat-bar {
+            width: 100px;
+            height: 5px;
+            background: #eee;
+            border-radius: 3px;
+        }
+        .stat-bar-fill {
+            height: 100%;
+            background: #2a2a2a;
+            border-radius: 3px;
+        }
+        .close-modal {
+            margin-top: 16px;
+            text-align: center;
+            color: #2a2a2a;
+            cursor: pointer;
+            padding: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        /* API配置页面样式 */
+        .api-config-page {
+            background: #fafafa;
+        }
+        .api-config-header {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        .api-config-back {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .api-config-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+            color: #2a2a2a;
+        }
+        .api-config-placeholder {
+            width: 44px;
+        }
+        .api-config-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .api-status-msg {
+            padding: 12px;
+            border-radius: 12px;
+            background: #e3f2fd;
+            color: #0b5e8e;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        .api-status-msg.success {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+        .api-status-msg.error {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+        .api-status-msg.warning {
+            background: #fff8e1;
+            color: #b76e00;
+        }
+/* 气泡操作菜单 */
+.bubble-menu {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    padding: 4px;
+    display: none;
+    z-index: 1000;
+    max-width: 260px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+.bubble-menu::-webkit-scrollbar {
+    display: none;
+}
+.bubble-menu.active {
+    display: flex;
+    gap: 2px;
+}
+.bubble-menu-item {
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #333;
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.bubble-menu-item:active {
+    background: #f0f0f0;
+}
+.bubble-menu-item.delete {
+    color: #e53935;
+}
+.bubble-menu-item.rewind {
+    color: #1976d2;
+}
+/* 多选模式样式 */
+.message-row.selectable .bubble {
+    position: relative;
+    cursor: pointer;
+}
+.message-row.selected .bubble {
+    outline: 3px solid #2a2a2a;
+    outline-offset: 2px;
+}
+.message-row .select-checkbox {
+    display: none;
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    border: 2px solid #ccc;
+    background: white;
+}
+.message-row.selectable .select-checkbox {
+    display: block;
+}
+.message-row.selected .select-checkbox {
+    background: #2a2a2a;
+    border-color: #2a2a2a;
+}
+.message-row.selected .select-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.system-message.selectable {
+    position: relative;
+    cursor: pointer;
+    padding-left: 30px;
+}
+.system-message .select-checkbox {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    background: white;
+}
+.system-message.selectable .select-checkbox {
+    display: block;
+}
+.system-message.selected .select-checkbox {
+    background: #2a2a2a;
+    border-color: #2a2a2a;
+}
+.system-message.selected .select-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* 多选底部栏 */
+.multi-select-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 12px 16px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 900;
+}
+.multi-select-bar.active {
+    display: flex;
+}
+.multi-select-bar .selected-count {
+    color: #666;
+    font-size: 14px;
+}
+.multi-select-bar .bar-actions {
+    display: flex;
+    gap: 12px;
+}
+.multi-select-bar .bar-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+}
+.multi-select-bar .bar-btn.cancel {
+    background: #f0f0f0;
+    color: #555;
+}
+.multi-select-bar .bar-btn.delete {
+    background: #e53935;
+    color: white;
+}
+/* 道具仓库模态框 */
+.items-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.items-modal.active {
+    display: flex;
+}
+.items-modal-content {
+    width: 360px;
+    max-width: 90vw;
+    height: 500px;
+    max-height: 80vh;
+    background: white;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+.items-header h3 {
+    font-size: 18px;
+    font-weight: 500;
+}
+.items-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+.items-close-btn:active {
+    background: #f0f0f0;
+}
+.items-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+.items-list {
+    width: 130px;
+    border-right: 1px solid #eee;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+.items-list::-webkit-scrollbar {
+    width: 3px;
+}
+.items-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+.item-list-item {
+    padding: 12px 12px;
+    cursor: pointer;
+    border-bottom: 0.5px solid #f0f0f0;
+    transition: background 0.15s;
+}
+.item-list-item:hover {
+    background: #f9f9f9;
+}
+.item-list-item.selected {
+    background: #2a2a2a;
+    color: white;
+}
+.item-list-item .item-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+.item-list-item .item-quantity {
+    font-size: 11px;
+    opacity: 0.7;
+}
+.item-list-item.selected .item-quantity {
+    color: #ddd;
+}
+.items-detail {
+    flex: 1;
+    padding: 20px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.items-detail-empty {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+}
+.items-detail-content {
+    flex: 1;
+}
+.item-detail-name {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+.item-detail-field {
+    margin-bottom: 16px;
+}
+.item-detail-field label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 4px;
+}
+.item-detail-field p {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+}
+.items-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+.item-action-btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+}
+.item-action-btn.use {
+    background: #2a2a2a;
+    color: white;
+}
+.item-action-btn.give {
+    background: #4a6fa5;
+    color: white;
+}
+.item-action-btn.discard {
+    background: #f0f0f0;
+    color: #e53935;
+}
+.item-action-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+.item-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 道具使用/NPC选择模态框 */
+.item-target-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+.item-target-modal.active {
+    display: flex;
+}
+.item-target-content {
+    width: 300px;
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+}
+.item-target-content h4 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.target-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.target-item {
+    padding: 14px 12px;
+    border-bottom: 0.5px solid #eee;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.target-item:active {
+    background: #f5f5f5;
+}
+.target-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: #2a2a2a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.target-info {
+    flex: 1;
+}
+.target-name {
+    font-weight: 500;
+}
+.target-role {
+    font-size: 12px;
+    color: #888;
+}
+.token-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 13px;
+    color: #666;
+    border-top: 0.5px solid #eee;
+    margin-top: 8px;
+}
+.token-info .token-label {
+    color: #888;
+}
+.token-info .token-value {
+    font-weight: 500;
+    color: #2a2a2a;
+}
+.api-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2a2a2a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+.api-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.api-toast.loading {
+    background: #1976d2;
+}
+.api-toast.error {
+    background: #e53935;
+}
+.api-toast.success {
+    background: #2e7d32;
+}
+.api-toast .error-code {
+    display: block;
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 4px;
+}
+/* 查看原文模态框 */
+.fulltext-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+.fulltext-modal.active {
+    display: flex;
+}
+.fulltext-modal-content {
+    width: 340px;
+    max-width: 90vw;
+    max-height: 70vh;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.fulltext-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+.fulltext-header h3 {
+    font-size: 17px;
+    font-weight: 500;
+}
+.fulltext-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    position: relative;
+}
+.fulltext-close-btn:active {
+    background: #f0f0f0;
+}
+.fulltext-body {
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #333;
+    white-space: pre-wrap;
+}
+.fulltext-body::-webkit-scrollbar {
+    width: 3px;
+}
+.fulltext-body::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+/* ========== 新增：设置列表页样式 ========== */
+.settings-list-page {
+    background: #fafafa;
+}
+.settings-list-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+.settings-list-back {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.settings-list-title {
+    flex: 1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 500;
+    color: #2a2a2a;
+}
+.settings-list-placeholder {
+    width: 44px;
+}
+.settings-list-content {
+    padding: 16px;
+}
+.settings-list-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.15s;
+}
+.settings-list-item:active {
+    background: #f0f0f0;
+    transform: scale(0.98);
+}
+.settings-item-icon {
+    font-size: 24px;
+    margin-right: 14px;
+}
+.settings-item-label {
+    flex: 1;
+    font-size: 16px;
+    color: #2a2a2a;
+    font-weight: 500;
+}
+.settings-item-arrow {
+    font-size: 22px;
+    color: #ccc;
+}
+
+/* ========== 新增：美化设置页样式 ========== */
+.beauty-config-page {
+    background: #fafafa;
+}
+.beauty-config-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+.beauty-config-back {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.beauty-config-title {
+    flex: 1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 500;
+    color: #2a2a2a;
+}
+.beauty-config-placeholder {
+    width: 44px;
+}
+.beauty-config-content {
+    padding: 16px;
+    overflow-y: auto;
+}
+.beauty-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.beauty-section-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #2a2a2a;
+    margin-bottom: 4px;
+}
+.beauty-section-desc {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 14px;
+}
+.beauty-preview {
+    width: 100%;
+    height: 160px;
+    border-radius: 12px;
+    background: #f0f0f0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-size: 14px;
+    border: 1px dashed #ddd;
+    overflow: hidden;
+}
+.beauty-actions {
+    display: flex;
+    gap: 10px;
+}
+.beauty-upload-btn {
+    flex: 1;
+    padding: 12px;
+    background: #2a2a2a;
+    color: white;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.beauty-upload-btn:active {
+    background: #1a1a1a;
+    transform: scale(0.98);
+}
+.beauty-reset-btn {
+    flex: 1;
+    padding: 12px;
+    background: #f0f0f0;
+    color: #555;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.beauty-reset-btn:active {
+    background: #ddd;
+    transform: scale(0.98);
+}
+.beauty-save-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+.beauty-save-all-btn {
+    flex: 2;
+    padding: 14px;
+    background: #2a2a2a;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.beauty-save-all-btn:active {
+    background: #1a1a1a;
+    transform: scale(0.98);
+}
+.beauty-reset-all-btn {
+    flex: 1;
+    padding: 14px;
+    background: #f0f0f0;
+    color: #e53935;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.beauty-reset-all-btn:active {
+    background: #ddd;
+    transform: scale(0.98);
+}
+    </style>
+</head>
+<body>
+<div class="mylife-app">
+    <div class="app-content">
+        <div id="homePage" class="page home-page active">
+            <div class="home-header">
+                <div style="width:44px;"></div>
+                <div class="home-title-section">
+                    <div class="app-icon" id="enterAppIcon">🌿</div>
+                    <div class="app-title">Mylife</div>
+                </div>
+                <button class="settings-btn" id="openSettingsBtn">⚙️</button>
+            </div>
+            <div class="sim-list" id="simulatorList"></div>
+            <div class="new-sim-btn" id="newSimBtn">+ 新建模拟器</div>
+        </div>
+
+        <div id="editorPage" class="page editor-page">
+            <div class="editor-header">
+    <div class="editor-back" id="backFromEditor">←</div>
+    <div class="editor-title" id="editorTitle">新建模拟器</div>
+    <button class="editor-delete-btn" id="deleteSimBtn" style="display: none;">🗑️</button>
+</div>
+            <div class="wizard-steps" id="wizardSteps">
+                <div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div>
+            </div>
+            <div class="wizard-content" id="wizardContent"></div>
+            <div class="wizard-nav" id="wizardNav"></div>
+        </div>
+
+        <div id="playPage" class="page play-page">
+            <div class="play-header">
+                <button class="exit-play-btn" id="exitPlayBtn">←</button>
+                <div class="time-bar">
+                    <span class="time-display" id="timeDisplay">1024年3月15日 8时</span>
+                    <button class="time-settings-btn" id="timeSettingsBtn">⚙️</button>
+                </div>
+            </div>
+            <div class="time-settings-panel" id="timeSettingsPanel">
+                <!-- 行动点系统已移除 -->
+                <div class="time-selector">
+                    <select id="timeUnitSelect">
+    <option value="hour">1小时</option>
+    <option value="halfDay">半日</option>
+    <option value="day" selected>1日</option>
+    <option value="threeDays">3日</option>
+    <option value="week">1周</option>
+    <option value="month">1月</option>
+    <option value="quarter">1季</option>
+    <option value="year">1年</option>
+    <option value="threeYears">3年</option>
+    <option value="tenYears">10年</option>
+</select>
+                    <button class="advance-btn" id="advanceTimeBtn">推进</button>
+                </div>
+                <div class="token-info" id="tokenInfo">
+    <span class="token-label">🔢 上次API消耗</span>
+    <span class="token-value" id="tokenValue">-- tokens</span>
+</div>
+                <div class="save-load-group">
+                    <button class="modal-btn secondary" id="openSaveModalBtn">💾 存档</button>
+                    <button class="modal-btn secondary" id="openLoadModalBtn">📂 读档</button>
+                </div>
+            </div>
+            <div class="event-stream" id="eventStream"></div>
+            <div class="input-area">
+                <div class="input-tabs">
+                    <span class="input-tab active" data-mode="say">💬 说话</span>
+                    <span class="input-tab" data-mode="narrate">📝 旁白</span>
+                </div>
+                <div class="input-row">
+                    <button class="action-btn" id="extraActionBtn" title="使用道具/行动">➕</button>
+                    <input type="text" class="input-field" id="messageInput" placeholder="输入内容...">
+                    <button class="action-btn" id="getAIReplyBtn" title="获取AI剧情">🤖</button>
+                    <button class="send-btn" id="sendBtn">→</button>
+                </div>
+            </div>
+        </div>
+
+<!-- ========== 新增：设置列表页 ========== -->
+<div id="settingsListPage" class="page settings-list-page">
+    <div class="settings-list-header">
+        <button class="settings-list-back" id="backFromSettingsList">←</button>
+        <span class="settings-list-title">设置</span>
+        <div class="settings-list-placeholder"></div>
+    </div>
+    <div class="settings-list-content">
+        <div class="settings-list-item" id="goApiConfigBtn">
+            <span class="settings-item-icon">⚙️</span>
+            <span class="settings-item-label">API 配置</span>
+            <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-list-item" id="goBeautyConfigBtn">
+            <span class="settings-item-icon">🎨</span>
+            <span class="settings-item-label">美化设置</span>
+            <span class="settings-item-arrow">›</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 新增：美化设置页 ========== -->
+<div id="beautyConfigPage" class="page beauty-config-page">
+    <div class="beauty-config-header">
+        <button class="beauty-config-back" id="backFromBeautyConfig">←</button>
+        <span class="beauty-config-title">美化设置</span>
+        <div class="beauty-config-placeholder"></div>
+    </div>
+    <div class="beauty-config-content">
+        <div class="beauty-section">
+            <h4 class="beauty-section-title">🏠 初始页背景</h4>
+            <p class="beauty-section-desc">设置主页面（模拟器列表）的背景图片</p>
+            <div class="beauty-preview" id="homeBgPreview"></div>
+            <div class="beauty-actions">
+                <label class="beauty-upload-btn">
+                    📁 选择图片
+                    <input type="file" id="homeBgInput" accept="image/*" style="display:none;">
+                </label>
+                <button class="beauty-reset-btn" id="resetHomeBgBtn">🔄 恢复默认</button>
+            </div>
+        </div>
+        <div class="beauty-section">
+            <h4 class="beauty-section-title">🎮 游玩页背景</h4>
+            <p class="beauty-section-desc">设置游戏进行中的背景图片</p>
+            <div class="beauty-preview" id="playBgPreview"></div>
+            <div class="beauty-actions">
+                <label class="beauty-upload-btn">
+                    📁 选择图片
+                    <input type="file" id="playBgInput" accept="image/*" style="display:none;">
+                </label>
+                <button class="beauty-reset-btn" id="resetPlayBgBtn">🔄 恢复默认</button>
+            </div>
+        </div>
+        <div class="beauty-save-area">
+            <button class="beauty-save-all-btn" id="saveBeautyBtn">💾 保存设置</button>
+            <button class="beauty-reset-all-btn" id="resetAllBeautyBtn">🗑️ 清除所有背景</button>
+        </div>
+        <div id="beautyStatusMsg" class="api-status-msg" style="margin-top:16px;">
+            💡 修改后点击"保存设置"生效
+        </div>
+    </div>
+</div>
+
+        <div id="apiConfigPage" class="page api-config-page">
+            <div class="api-config-header">
+                <button class="api-config-back" id="backFromApiConfig">←</button>
+                <span class="api-config-title">API 配置</span>
+                <div class="api-config-placeholder"></div>
+            </div>
+            <div class="api-config-content" id="apiConfigContainer">
+                <!-- API配置内容会动态渲染到这里 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="status-modal" id="statusModal">
+        <div class="status-card" id="statusCardContent"></div>
+    </div>
+
+    <div class="relation-modal" id="relationModal">
+        <div class="relation-modal-content">
+            <h3 id="relationModalTitle">创建关系</h3>
+            <input type="text" id="relationDescInput" placeholder="关系描述，如：朋友、敌人...">
+            <div class="relation-modal-actions">
+                <button class="modal-btn secondary" id="cancelRelationBtn">取消</button>
+                <button class="modal-btn primary" id="saveRelationBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="edit-relation-modal" id="editRelationModal">
+        <div class="edit-relation-content">
+            <h3 id="editRelationTitle">编辑关系</h3>
+            <input type="text" id="editRelationDescInput" placeholder="关系描述" maxlength="20">
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="cancelEditRelationBtn">取消</button>
+                <button class="modal-btn primary" id="saveEditRelationBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-load-modal" id="saveLoadModal">
+        <div class="save-load-content" id="saveLoadContent"></div>
+    </div>
+<!-- 气泡操作菜单 -->
+<div class="bubble-menu" id="bubbleMenu">
+    <div class="bubble-menu-item" data-action="rewind">↩️ 重回</div>
+    <div class="bubble-menu-item" data-action="delete">🗑️ 删除</div>
+    <div class="bubble-menu-item" data-action="multiSelect">✅ 多选</div>
+    <div class="bubble-menu-item" data-action="edit">✏️ 修改</div>
+    <div class="bubble-menu-item" data-action="viewFullText">📖 查看原文</div>
+</div>
+
+<!-- 多选底部栏 -->
+<div class="multi-select-bar" id="multiSelectBar">
+    <span class="selected-count" id="selectedCount">已选择 0 项</span>
+    <div class="bar-actions">
+        <button class="bar-btn cancel" id="cancelMultiSelectBtn">取消</button>
+        <button class="bar-btn delete" id="confirmMultiDeleteBtn">删除</button>
+    </div>
+</div>
+<!-- 道具仓库模态框 -->
+<div class="items-modal" id="itemsModal">
+    <div class="items-modal-content">
+        <div class="items-header">
+            <h3>🎒 道具仓库</h3>
+            <button class="items-close-btn" id="closeItemsModal">✕</button>
+        </div>
+        <div class="items-body">
+            <div class="items-list" id="itemsList"></div>
+            <div class="items-detail" id="itemsDetail"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 道具使用目标选择模态框 -->
+<div class="item-target-modal" id="itemTargetModal">
+    <div class="item-target-content">
+        <h4 id="targetModalTitle">选择使用对象</h4>
+        <div class="target-list" id="targetList"></div>
+        <div style="margin-top: 16px;">
+            <button class="modal-btn secondary" id="cancelTargetBtn" style="width:100%;">取消</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- 查看原文模态框 -->
+<div class="fulltext-modal" id="fulltextModal">
+    <div class="fulltext-modal-content">
+        <div class="fulltext-header">
+            <h3>📖 完整原文</h3>
+            <button class="fulltext-close-btn" id="closeFulltextModal" style="font-size:16px; font-weight:bold;">关闭</button>
+        </div>
+        <div class="fulltext-body" id="fulltextBody"></div>
+    </div>
+</div>
+</div>
+
+<script>
+(function(){
+    "use strict";
+    
+    const STORAGE_KEY = 'mylife_simulators_v5';
+    
+    // ========== 新增：世界观预设库 ==========
+    const WORLDVIEW_PRESETS = {
+    '仙侠': {
+        description: '仙侠世界，灵气复苏，宗门林立，求道长生。修士们吞吐日月精华，争夺天材地宝，只为有朝一日渡劫飞升。',
+        stylePrompt: '语言风格：古风盎然，多用成语和比喻。人物对话应符合其修仙者身份（如：师尊威严、魔头乖戾、散修圆滑）。场景描写应突出仙气或魔氛，可提及灵脉、法宝、丹药等元素。',
+        keywords: ['飞升', '炼丹炉', '剑修', '无情道', '因果', '天劫', '灵根', '道心', '灵石', '秘境'],
+        sceneKeywords: ['洞府', '大殿', '丹房', '剑阁', '秘境', '灵脉', '山门', '藏经阁', '演武场', '后山', '灵田', '禁地', '天梯', '云端', '仙宫']
+    },
+    '豪门': {
+        description: '现代豪门世家，金钱与权力的中心。高楼广厦间，觥筹交错中，无数暗流涌动，每个人都戴着精致的面具。',
+        stylePrompt: '语言风格：现代、精致且充满潜台词。人物对话常带双关和试探。场景描写应突出奢华、压抑或算计的氛围，可提及名牌、酒会、商业术语。',
+        keywords: ['继承权', '商业联姻', '私生子', '股份', '名媛', '算计', '家族企业', '董事会', '信托基金'],
+        sceneKeywords: ['别墅', '会议室', '宴会厅', '私人会所', '办公室', '豪宅', '酒会', '高尔夫球场', '游艇', '总统套房', '董事会议室', '名流派对']
+    },
+    '末世': {
+        description: '秩序崩溃的废土世界，资源匮乏，丧尸横行。人性的光辉与黑暗在这片荒芜之地上演着永恒的角力。',
+        stylePrompt: '语言风格：简洁、残酷、务实。人物对话充满警惕或不信任。场景描写突出荒凉、破败和生存的压力，可提及变异生物、废弃建筑、稀缺资源。',
+        keywords: ['异能', '丧尸', '幸存者基地', '进化', '资源点', '变异', '旧世界', '辐射', '觉醒'],
+        sceneKeywords: ['废墟', '避难所', '废弃城市', '地下通道', '荒原', '哨站', '旧仓库', '破败医院', '军事基地', '临时营地', '变异巢穴']
+    },
+    'ABO': {
+        description: '基于Alpha、Beta、Omega三种性别的世界观。信息素影响着每个人的命运，本能的支配与反抗交织成复杂的社会关系。',
+        stylePrompt: '语言风格：根据角色性别分化不同，Alpha通常强势自信，Omega可能内敛敏感或外柔内刚。描写可涉及信息素的微妙变化和本能的挣扎。',
+        keywords: ['信息素', '抑制剂', '标记', '易感期', '发情期', 'Alpha', 'Omega', 'Beta', '配对'],
+        sceneKeywords: ['公寓', '办公室', '实验室', '医院', '校园', '酒吧', '公寓楼', '隔离室', '体检中心', '宿舍', '私人诊所']
+    },
+    '古代朝堂': {
+        description: '皇权至上，权谋斗争的漩涡。世家门阀与皇室相互制衡，每一步都如履薄冰，一言可定生死。',
+        stylePrompt: '语言风格：半文半白，含蓄内敛，讲究礼法规矩。人物对话多用敬语，暗藏机锋。场景描写突出礼制、威仪或暗流，可提及朝服、奏折、党争。',
+        keywords: ['权谋', '科举', '世家', '党争', '兵权', '圣意', '联姻', '夺嫡', '外戚', '宦官'],
+        sceneKeywords: ['金銮殿', '御书房', '东宫', '丞相府', '刑部大牢', '御花园', '军营', '城门', '驿馆', '后宫', '祠堂', '书院', '校场']
+    },
+    '现代都市': {
+        description: '我们熟悉的现代生活，高楼林立，车水马龙。每个人都在为生活奔波，在爱情、职场与日常中寻找自己的位置。',
+        stylePrompt: '语言风格：轻松、自然、生活化。人物对话符合其职业和性格。场景描写贴近现实，可提及工作、社交、生活琐事。',
+        keywords: ['职场', '内卷', '相亲', '创业', '房贷', '梦想', '现实', '朋友圈', '加班'],
+        sceneKeywords: ['公司', '咖啡厅', '地铁站', '公寓', '商场', '公园', '餐厅', '健身房', '书店', '医院', '学校', '街头', '天台']
+    }
+};
+    // 获取预设的描述文本
+    function getWorldviewDescFromType(type) {
+        return WORLDVIEW_PRESETS[type]?.description || type;
+    }
+    
+    // ========== API 接口预留 ==========
+    // AI服务接口 - 后续接入真实API时替换这里的实现
+    const AIService = {
+        // 基础配置
+        config: {
+            apiEndpoint: '',  // 填入API地址
+            apiKey: '',       // 填入API密钥
+            model: ''         // 模型名称
+        },
+        
+        // 初始化配置
+        init: function(config) {
+            this.config = { ...this.config, ...config };
+        },
+        
+        // 生成NPC回复
+        async generateNPCReply(npc, userMessage, context) {
+            // 如果配置了API，则调用真实API
+            if (this.config.apiKey && this.config.apiEndpoint) {
+                return await this.callRealAPI(npc, userMessage, context);
+            }
+            
+            // 临时模拟回复
+            const mockReplies = [
+                `${npc.name}若有所思地看着你`,
+                `${npc.name}轻轻点头："我明白了。"`,
+                `${npc.name}微微一笑，没有说话。`,
+                `${npc.name}说："这倒是有趣。"`,
+                `${npc.name}沉思片刻，似乎在权衡什么。`
+            ];
+            
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(mockReplies[Math.floor(Math.random() * mockReplies.length)]);
+                }, 500);
+            });
+        },
+        
+        // 调用真实API
+        async callRealAPI(npc, userMessage, context) {
+            try {
+                const systemPrompt = this.buildSystemPrompt(npc, context);
+                const messages = [
+                    { role: 'system', content: systemPrompt },
+                    ...(context.history || []),
+                    { role: 'user', content: userMessage }
+                ];
+                
+                const response = await fetch(this.config.apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.config.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: this.config.model,
+                        messages: messages,
+                        temperature: parseFloat(localStorage.getItem('llm_temperature') || '0.8'),
+                        max_tokens: parseInt(localStorage.getItem('llm_max_tokens') || '800'),
+                        top_p: parseFloat(localStorage.getItem('llm_top_p') || '1.0')
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error('Invalid API response');
+                }
+            } catch (error) {
+                console.error('AI API error:', error);
+                return `${npc.name}沉默不语。`;
+            }
+        },
+        
+        // 生成剧情推进
+        async generateStoryProgression(context) {
+            // TODO: 接入真实API
+            // 参数说明:
+            // - context: 包含当前模拟器所有状态、角色、关系、历史等
+            
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        narration: '时光流逝，一切如常。',
+                        events: []
+                    });
+                }, 500);
+            });
+        },
+        
+        // 构建系统提示词（已废弃，保留空实现）
+buildSystemPrompt(npc, context) {
+    return '';
+},
+        
+        // 构建剧情上下文（增强版：智能识别场景和在场NPC）
+buildStoryContext(simulator) {
+    const allMessages = simulator.messages || [];
+    
+    // 1. 提取最近N条对话消息
+    const recentBubbles = allMessages
+        .filter(m => m.type === 'bubble')
+        .slice(-15);
+    
+    // 2. 提取最近的系统消息（旁白、环境描写）
+    const recentSystems = allMessages
+        .filter(m => m.type === 'system')
+        .slice(-8);
+    
+    // 3. 从最近系统消息中推断当前场景
+    let currentScene = '未知地点';
+    const worldviewType = simulator.worldviewType || '仙侠';
+const preset = WORLDVIEW_PRESETS[worldviewType];
+const sceneKeywords = preset?.sceneKeywords || ['洞府', '大殿', '密室', '广场', '树林', '客栈', '街道', '宗门', '房间', '厅堂', '山崖', '河边'];
+    for (let i = recentSystems.length - 1; i >= 0; i--) {
+        for (const keyword of sceneKeywords) {
+            if (recentSystems[i].content.includes(keyword)) {
+                currentScene = recentSystems[i].content;
+                break;
+            }
+        }
+        if (currentScene !== '未知地点') break;
+    }
+    
+    // 4. 判断当前在场的NPC
+    const presentNpcs = simulator.npcs.filter(npc => {
+        // 最近5条对话中发过言的，肯定在场
+        if (recentBubbles.slice(-5).some(m => m.speaker === npc.name)) return true;
+        // 最近系统消息中被描述过的，也在场
+        if (recentSystems.some(m => m.content.includes(npc.name))) return true;
+        return false;
+    });
+    
+    // 如果没检测到在场NPC，至少把最近发言者算上
+    if (presentNpcs.length === 0 && recentBubbles.length > 0) {
+        const lastSpeaker = recentBubbles[recentBubbles.length - 1].speaker;
+        const foundNpc = simulator.npcs.find(n => n.name === lastSpeaker);
+        if (foundNpc) presentNpcs.push(foundNpc);
+    }
+    
+    return {
+        worldview: simulator.worldview,
+        worldviewType: simulator.worldviewType || '仙侠',
+        user: simulator.user,
+        npcs: simulator.npcs,
+        relations: simulator.relations,
+        gameTime: simulator.gameTime,
+        recentMessages: recentBubbles,
+        recentSystems: recentSystems,
+        currentScene: currentScene,
+        presentNpcs: presentNpcs,
+        allNpcs: simulator.npcs,
+    };
+},
+    };
+    
+    // ========== API配置模块 ==========
+    const API_STORAGE_KEYS = {
+        baseUrl: 'llm_base_url',
+        apiKey: 'llm_api_key',
+        model: 'llm_model',
+        temperature: 'llm_temperature',
+        maxTokens: 'llm_max_tokens',
+        topP: 'llm_top_p',
+        modelsCache: 'llm_models_cache'
+    };
+
+    function getApiConfig() {
+        return {
+            baseUrl: localStorage.getItem(API_STORAGE_KEYS.baseUrl) || 'https://api.openai.com/v1',
+            apiKey: localStorage.getItem(API_STORAGE_KEYS.apiKey) || '',
+            model: localStorage.getItem(API_STORAGE_KEYS.model) || 'gpt-3.5-turbo',
+            temperature: parseFloat(localStorage.getItem(API_STORAGE_KEYS.temperature) || '0.8'),
+            maxTokens: parseInt(localStorage.getItem(API_STORAGE_KEYS.maxTokens) || '800'),
+            topP: parseFloat(localStorage.getItem(API_STORAGE_KEYS.topP) || '1.0')
+        };
+    }
+
+    function saveApiConfig(config) {
+        if (config.baseUrl !== undefined) localStorage.setItem(API_STORAGE_KEYS.baseUrl, config.baseUrl);
+        if (config.apiKey !== undefined) localStorage.setItem(API_STORAGE_KEYS.apiKey, config.apiKey);
+        if (config.model !== undefined) localStorage.setItem(API_STORAGE_KEYS.model, config.model);
+        if (config.temperature !== undefined) localStorage.setItem(API_STORAGE_KEYS.temperature, config.temperature.toString());
+        if (config.maxTokens !== undefined) localStorage.setItem(API_STORAGE_KEYS.maxTokens, config.maxTokens.toString());
+        if (config.topP !== undefined) localStorage.setItem(API_STORAGE_KEYS.topP, config.topP.toString());
+    }
+
+    function getModelsCache() {
+        try {
+            const cache = localStorage.getItem(API_STORAGE_KEYS.modelsCache);
+            return cache ? JSON.parse(cache) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function setModelsCache(models) {
+        localStorage.setItem(API_STORAGE_KEYS.modelsCache, JSON.stringify(models));
+    }
+
+    function renderApiConfigPage() {
+        const container = document.getElementById('apiConfigContainer');
+        const config = getApiConfig();
+        const modelsCache = getModelsCache();
+        
+        container.innerHTML = `
+            <div class="form-group">
+                <label>🌐 Base URL</label>
+                <input type="text" id="apiBaseUrl" placeholder="https://api.openai.com/v1" value="${escapeHtml(config.baseUrl)}">
+            </div>
+            <div class="form-group">
+                <label>🔑 API Key</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="password" id="apiKey" style="flex:1;" value="${escapeHtml(config.apiKey)}">
+                    <button class="action-btn" id="toggleApiKeyBtn" style="width:auto; padding:0 16px;" type="button">👁️</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>🤖 模型</label>
+                <div style="display:flex; gap:8px;">
+                    <select id="modelSelect" style="flex:1; padding:12px; border-radius:12px; border:none; background:white;">
+                        ${modelsCache.length === 0 
+                            ? `<option value="${escapeHtml(config.model)}">${escapeHtml(config.model)}</option>`
+                            : modelsCache.map(m => `<option value="${escapeHtml(m)}" ${m===config.model?'selected':''}>${escapeHtml(m)}</option>`).join('')
+                        }
+                    </select>
+                    <button class="action-btn" id="refreshModelsBtn" style="width:auto; padding:0 16px;" type="button">🔄</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>🌡️ Temperature: <span id="temperatureValue">${config.temperature.toFixed(1)}</span></label>
+                <input type="range" id="temperatureSlider" min="0" max="2" step="0.1" value="${config.temperature}" style="width:100%;">
+            </div>
+            <div class="form-group">
+                <label>📏 Max Tokens</label>
+                <input type="number" id="maxTokensInput" value="${config.maxTokens}" min="100" max="4000" step="50">
+            </div>
+            <div class="form-group">
+                <label>📊 Top P: <span id="topPValue">${config.topP.toFixed(2)}</span></label>
+                <input type="range" id="topPSlider" min="0" max="1" step="0.05" value="${config.topP}" style="width:100%;">
+            </div>
+            
+            <div style="display:flex; gap:10px; margin:20px 0;">
+                <button class="wizard-btn" id="fetchModelsBtn">📡 拉取模型</button>
+                <button class="wizard-btn" id="testApiBtn">🔍 测试连接</button>
+                <button class="wizard-btn primary" id="saveApiBtn">💾 保存</button>
+            </div>
+            
+            <div id="apiStatusMsg" class="api-status-msg">
+                ⚙️ 配置 API 后可保存测试
+            </div>
+        `;
+        
+        bindApiConfigEvents();
+    }
+
+    function bindApiConfigEvents() {
+        document.getElementById('toggleApiKeyBtn')?.addEventListener('click', () => {
+            const inp = document.getElementById('apiKey');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        });
+        
+        document.getElementById('temperatureSlider')?.addEventListener('input', (e) => {
+            document.getElementById('temperatureValue').textContent = parseFloat(e.target.value).toFixed(1);
+        });
+        document.getElementById('topPSlider')?.addEventListener('input', (e) => {
+            document.getElementById('topPValue').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        
+        document.getElementById('fetchModelsBtn')?.addEventListener('click', async () => {
+            const baseUrl = document.getElementById('apiBaseUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const statusEl = document.getElementById('apiStatusMsg');
+            
+            if (!baseUrl || !apiKey) {
+                statusEl.innerHTML = '❌ Base URL 和 API Key 不能为空';
+                statusEl.className = 'api-status-msg error';
+                return;
+            }
+            statusEl.innerHTML = '📡 正在拉取模型列表...';
+            statusEl.className = 'api-status-msg';
+            
+            try {
+                const cleanBase = baseUrl.replace(/\/+$/, '');
+                const response = await fetch(`${cleanBase}/models`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            function renderPlayPage() {
+    if (!currentSimulator) return;
+    const t = currentSimulator.gameTime;
+    document.getElementById('timeDisplay').textContent = `${t.year}年${t.month}月${t.day}日 ${t.hour}时`;
+    updateTokenDisplay();
+    renderEventStream();
+};
+                const models = (data.data || []).map(m => m.id).filter(id => id && !id.includes('dall-e') && !id.includes('whisper') && !id.includes('tts')).sort();
+                setModelsCache(models);
+                
+                const select = document.getElementById('modelSelect');
+                select.innerHTML = models.map(m => `<option>${escapeHtml(m)}</option>`).join('');
+                statusEl.innerHTML = `✅ 成功拉取 ${models.length} 个模型`;
+                statusEl.className = 'api-status-msg success';
+            } catch (e) {
+                statusEl.innerHTML = `❌ 拉取失败: ${e.message}`;
+                statusEl.className = 'api-status-msg error';
+            }
+        });
+        
+        document.getElementById('testApiBtn')?.addEventListener('click', async () => {
+            const baseUrl = document.getElementById('apiBaseUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const statusEl = document.getElementById('apiStatusMsg');
+            
+            if (!baseUrl || !apiKey) {
+                statusEl.innerHTML = '❌ Base URL 和 API Key 不能为空';
+                statusEl.className = 'api-status-msg error';
+                return;
+            }
+            statusEl.innerHTML = '🔍 正在测试连接...';
+            statusEl.className = 'api-status-msg';
+            
+            try {
+                const cleanBase = baseUrl.replace(/\/+$/, '');
+                const response = await fetch(`${cleanBase}/models`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                statusEl.innerHTML = '✅ 连接成功！API 配置有效';
+                statusEl.className = 'api-status-msg success';
+            } catch (e) {
+                statusEl.innerHTML = `❌ 连接失败: ${e.message}`;
+                statusEl.className = 'api-status-msg error';
+            }
+        });
+        
+        document.getElementById('saveApiBtn')?.addEventListener('click', () => {
+            const config = {
+                baseUrl: document.getElementById('apiBaseUrl').value.trim(),
+                apiKey: document.getElementById('apiKey').value.trim(),
+                model: document.getElementById('modelSelect').value,
+                temperature: parseFloat(document.getElementById('temperatureSlider').value),
+                maxTokens: parseInt(document.getElementById('maxTokensInput').value),
+                topP: parseFloat(document.getElementById('topPSlider').value)
+            };
+            
+            saveApiConfig(config);
+            
+            // 同步更新AIService配置
+            AIService.init({
+                apiEndpoint: config.baseUrl + '/chat/completions',
+                apiKey: config.apiKey,
+                model: config.model
+            });
+            
+            const statusEl = document.getElementById('apiStatusMsg');
+            statusEl.innerHTML = '✅ 配置已保存到本地';
+            statusEl.className = 'api-status-msg success';
+            
+            console.log('API配置已保存:', { ...config, apiKey: '***' });
+        });
+        
+        document.getElementById('refreshModelsBtn')?.addEventListener('click', () => {
+            const models = getModelsCache();
+            const config = getApiConfig();
+            const select = document.getElementById('modelSelect');
+            const statusEl = document.getElementById('apiStatusMsg');
+            
+            if (models.length > 0) {
+                select.innerHTML = models.map(m => `<option value="${escapeHtml(m)}" ${m===config.model?'selected':''}>${escapeHtml(m)}</option>`).join('');
+                statusEl.innerHTML = `🔄 已从缓存加载 ${models.length} 个模型`;
+                statusEl.className = 'api-status-msg success';
+            } else {
+                statusEl.innerHTML = '📭 缓存中没有模型，请先"拉取模型"';
+                statusEl.className = 'api-status-msg warning';
+            }
+        });
+    }
+    
+    // 初始化AIService配置
+    function initAIServiceFromStorage() {
+        const config = getApiConfig();
+        if (config.apiKey) {
+            AIService.init({
+                apiEndpoint: config.baseUrl + '/chat/completions',
+                apiKey: config.apiKey,
+                model: config.model
+            });
+        }
+    }
+    
+    // ========== 数据管理 ==========
+    let simulators = [];
+    let currentSimulator = null;
+    let editingSimulator = null;
+    let currentStep = 1;
+    let pendingRelation = null;
+    let inputMode = 'say';
+let editingRelationIndex = -1;
+let multiSelectMode = false;
+let selectedMessageIndices = new Set();
+let currentBubbleMenuTarget = null;
+let currentSelectedItem = null;  // 当前选中的道具
+let pendingItemAction = null;    // 待执行的道具操作 { item, action }
+    
+    let resetProgressFlag = false;
+    let lastTokenUsage = { prompt: 0, completion: 0, total: 0 };
+    
+    let tempSimData = {
+        worldview: '', name: '',
+        user: { name: '我', role: '', persona: '', stats: { age: 25, money: 5000, scheme: 30, fame: 20, exp: 0, appearance: 80, fatigue: 10 } },
+        npcs: [],
+        relations: [],
+        events: [],
+        items: [],  // 新增：道具数组
+        startTime: { year: 1024, month: 3, day: 15, hour: 8 }
+    };
+    
+    function loadSimulators() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        simulators = stored ? JSON.parse(stored) : [];
+        if (simulators.length === 0) {
+            simulators.push(createDemoSimulator());
+            saveSimulators();
+        }
+        simulators.forEach(s => { 
+            if (!s.startTime) s.startTime = { year:1024, month:3, day:15, hour:8 };
+            s.npcs?.forEach(npc => {
+                if (!npc.textStats) npc.textStats = {};
+                if (!npc.textStats.innerVoice) npc.textStats.innerVoice = '';
+                if (!npc.textStats.darkThought) npc.textStats.darkThought = '';
+                if (!npc.role) npc.role = '';
+            });
+            s.events?.forEach(event => {
+                if (!event.conditionText && event.condition) {
+                    event.conditionText = `${event.condition.stat}${event.condition.operator}${event.condition.value}`;
+                }
+            });
+            if (!s.items) s.items = [];
+        });
+    }
+    
+    function createDemoSimulator() {
+        return {
+            id: 'demo_' + Date.now(),
+            name: '仙侠·青云',
+            worldview: WORLDVIEW_PRESETS['仙侠'].description, // 修改
+            worldviewType: '仙侠', // 新增
+            user: { name: '林清', role: '外门弟子', persona: '天资聪颖，勤奋刻苦', stats: { age: 18, money: 500, scheme: 40, fame: 30, exp: 0, appearance: 85, fatigue: 5 } },
+            npcs: [
+                { 
+                    id: 'npc1', 
+                    name: '云瑶',
+                    role: '大师姐',
+                    persona: '冷艳高傲', 
+                    stats: { age: 22, money: 5000, fame: 200, exp: 500, favor: 30, desire: 5 }, 
+                    textStats: { 
+                        innerVoice: '这个师弟有点意思，根骨不错。',
+                        darkThought: '若能为我所用，倒是一枚好棋子。',
+                        viewOnUser: '林清虽然入门不久，但天赋异禀，值得关注。'
+                    } 
+                },
+                { 
+                    id: 'npc2', 
+                    name: '墨渊',
+                    role: '外门弟子',
+                    persona: '心机深沉', 
+                    stats: { age: 28, money: 3000, fame: 50, exp: 300, favor: 40, desire: 60 }, 
+                    textStats: { 
+                        innerVoice: '林清似乎知道些什么秘密。',
+                        darkThought: '必须除掉这个威胁。',
+                        viewOnUser: '此人不简单，需小心应对。'
+                    } 
+                }
+            ],
+            relations: [{ from: '林清', to: '云瑶', desc: '师姐弟' }, { from: '林清', to: '墨渊', desc: '同门' }],
+            events: [{ conditionText: 'exp>=100', description: '突破到练气期' }],
+            items: [
+                { id: 'item1', name: '疗伤丹', effect: '恢复30点疲惫', obtainWay: '云瑶赠送', quantity: 2 },
+                { id: 'item2', name: '灵石', effect: '可用于修炼或交易', obtainWay: '宗门发放', quantity: 50 }
+            ],
+            createdAt: Date.now(), lastPlayed: Date.now(),
+            actionPoints: 10, maxActionPoints: 10,
+            gameTime: { year: 1024, month: 3, day: 15, hour: 8 },
+            startTime: { year: 1024, month: 3, day: 15, hour: 8 },
+            messages: [{ type: 'system', content: '青云宗，晨雾缭绕。新的一天开始了。' }],
+            saves: []
+        };
+    }
+    
+    function saveSimulators() { localStorage.setItem(STORAGE_KEY, JSON.stringify(simulators)); }
+    function escapeHtml(s) { return s ? String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]) : ''; }
+    function showApiToast(message, type, errorCode) {
+    type = type || 'loading';
+    errorCode = errorCode || '';
+    const toast = document.getElementById('apiToast');
+    if (!toast) return;
+    if (toast._timeout) clearTimeout(toast._timeout);
+    toast.className = 'api-toast ' + type;
+    var content = message;
+    if (errorCode) {
+        content += '<span class="error-code">错误码: ' + errorCode + '</span>';
+    }
+    toast.innerHTML = content;
+    setTimeout(function() { toast.classList.add('show'); }, 10);
+    toast._timeout = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 5000);
+}
+
+function updateTokenDisplay() {
+    var tokenValue = document.getElementById('tokenValue');
+    if (tokenValue && lastTokenUsage.total > 0) {
+        tokenValue.textContent = lastTokenUsage.total + ' tokens';
+    }
+}
+    
+    function renderHome() {
+        const container = document.getElementById('simulatorList');
+        if (!simulators.length) {
+            container.innerHTML = '<div class="empty-state">✨ 点击下方创建模拟器</div>';
+            return;
+        }
+        container.innerHTML = simulators.map(sim => `
+            <div class="sim-card" data-id="${sim.id}">
+                <div class="sim-card-header">
+                    <h3>${escapeHtml(sim.name)}</h3>
+                    <button class="sim-edit-btn" data-id="${sim.id}">✏️</button>
+                </div>
+                <p>${escapeHtml(sim.worldview?.substring(0, 50))}...</p>
+                <div class="sim-meta"><span>👤 ${escapeHtml(sim.user?.name)}</span><span>👥 ${sim.npcs?.length} NPC</span></div>
+            </div>
+        `).join('');
+        
+        container.querySelectorAll('.sim-card').forEach(card => {
+            card.addEventListener('click', e => {
+                if (e.target.closest('.sim-edit-btn')) return;
+                enterSimulator(card.dataset.id);
+            });
+        });
+        container.querySelectorAll('.sim-edit-btn').forEach(btn => {
+    btn.addEventListener('click', e => { 
+        e.stopPropagation(); 
+        const id = btn.dataset.id;
+        if (id) editSimulator(id);
+    });
+});
+    }
+    
+    function enterSimulator(id) {
+    currentSimulator = simulators.find(s => String(s.id) === String(id));
+    if (currentSimulator) {
+            currentSimulator.messages = currentSimulator.messages || [];
+            currentSimulator.saves = currentSimulator.saves || [];
+            renderPlayPage();
+            switchPage('play');
+        }
+    }
+    
+    function editSimulator(id) {
+    editingSimulator = simulators.find(s => String(s.id) === String(id));
+    resetProgressFlag = false;
+    if (editingSimulator) {
+            tempSimData = {
+                worldview: editingSimulator.worldview, 
+                worldviewType: editingSimulator.worldviewType || '仙侠', // 新增
+                name: editingSimulator.name,
+                user: JSON.parse(JSON.stringify(editingSimulator.user)),
+                npcs: JSON.parse(JSON.stringify(editingSimulator.npcs || [])),
+                relations: JSON.parse(JSON.stringify(editingSimulator.relations || [])),
+                events: JSON.parse(JSON.stringify(editingSimulator.events || [])),
+                items: JSON.parse(JSON.stringify(editingSimulator.items || [])),
+                startTime: editingSimulator.startTime ? {...editingSimulator.startTime} : { year:1024, month:3, day:15, hour:8 }
+            };
+            currentStep = 1;
+            document.getElementById('editorTitle').textContent = '编辑模拟器';
+            document.getElementById('deleteSimBtn').style.display = 'flex';  // ← 新增这一行
+            renderWizardStep();
+            switchPage('editor');
+        }
+    }
+    
+    function startNewSimulator() {
+    editingSimulator = null;
+    resetProgressFlag = false;
+    tempSimData = {
+            worldview: WORLDVIEW_PRESETS['仙侠'].description, // 修改：设置默认世界观描述
+            worldviewType: '仙侠', // 新增：默认世界观类型
+            name: '', 
+            user: { name: '我', role: '', persona: '', stats: { age: 25, money: 5000, scheme: 30, fame: 20, exp: 0, appearance: 80, fatigue: 10 } }, 
+            npcs: [], relations: [], events: [], items: [],
+            startTime: { year:1024, month:3, day:15, hour:8 } 
+        };
+        currentStep = 1;
+        document.getElementById('editorTitle').textContent = '新建模拟器';
+        document.getElementById('deleteSimBtn').style.display = 'none';  // ← 新增这一行
+        renderWizardStep();
+        switchPage('editor');
+    }
+    
+    function renderWizardStep() {
+        document.querySelectorAll('.step-dot').forEach((d, i) => {
+            d.classList.remove('active', 'completed');
+            if (i+1 === currentStep) d.classList.add('active');
+            else if (i+1 < currentStep) d.classList.add('completed');
+        });
+        
+        const content = document.getElementById('wizardContent');
+        if (currentStep === 1) renderStep1(content);
+        else if (currentStep === 2) renderStep2(content);
+        else if (currentStep === 3) renderStep3(content);
+        else if (currentStep === 4) renderStep4(content);
+        else if (currentStep === 5) renderStep5(content);
+        
+        const nav = document.getElementById('wizardNav');
+        if (currentStep === 1) nav.innerHTML = `<button class="wizard-btn" id="wizardCancel">取消</button><button class="wizard-btn primary" id="wizardNext">下一步</button>`;
+        else if (currentStep === 5) nav.innerHTML = `<button class="wizard-btn" id="wizardPrev">上一步</button><button class="wizard-btn primary" id="wizardSave">保存</button>`;
+        else nav.innerHTML = `<button class="wizard-btn" id="wizardPrev">上一步</button><button class="wizard-btn primary" id="wizardNext">下一步</button>`;
+        
+        bindWizardNav();
+    }
+    function bindWizardNav() {
+    document.getElementById('wizardCancel')?.addEventListener('click', () => {
+        if (confirm('确定取消？未保存的内容将丢失。')) {
+            switchPage('home');
+        }
+    });
+    
+    document.getElementById('wizardNext')?.addEventListener('click', () => {
+        collectStepData();
+        if (currentStep === 1 && !tempSimData.name) {
+            alert('请输入模拟器名称');
+            return;
+        }
+        currentStep++;
+        renderWizardStep();
+    });
+    
+    document.getElementById('wizardPrev')?.addEventListener('click', () => {
+        collectStepData();
+        currentStep--;
+        renderWizardStep();
+    });
+    
+    document.getElementById('wizardSave')?.addEventListener('click', () => {
+        collectStepData();
+        if (!tempSimData.name) {
+            alert('请输入模拟器名称');
+            return;
+        }
+        saveSimulator();
+    });
+}
+    
+    function renderStep1(container) {
+    const st = tempSimData.startTime;
+    
+    // 从已有的 tempSimData.worldview 尝试还原是哪种预设
+    let currentType = tempSimData.worldviewType || '仙侠';
+    // 如果没有保存类型，尝试通过描述匹配
+    if (!tempSimData.worldviewType) {
+        for (const type in WORLDVIEW_PRESETS) {
+            if (tempSimData.worldview === WORLDVIEW_PRESETS[type].description) {
+                currentType = type;
+                break;
+            }
+        }
+    }
+
+    container.innerHTML = `
+        <div class="form-group">
+            <label>🌍 世界观类型</label>
+            <select id="worldviewType">
+                ${Object.keys(WORLDVIEW_PRESETS).map(type => `<option value="${type}" ${type === currentType ? 'selected' : ''}>${type}</option>`).join('')}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>📖 世界观描述</label>
+            <textarea id="worldviewDesc" rows="3">${escapeHtml(tempSimData.worldview || WORLDVIEW_PRESETS[currentType].description)}</textarea>
+        </div>
+        <div class="form-group"><label>📛 名称</label><input id="simName" value="${escapeHtml(tempSimData.name)}"></div>
+        <div class="form-group"><label>📅 起始年月日</label>
+            <div style="display:flex; gap:8px;">
+                <input type="number" id="startYear" placeholder="年" value="${st.year}" style="flex:2"> 
+                <input type="number" id="startMonth" placeholder="月" value="${st.month}" style="flex:1"> 
+                <input type="number" id="startDay" placeholder="日" value="${st.day}" style="flex:1">
+            </div>
+        </div>
+        ${editingSimulator ? `
+        <div class="form-group" style="margin-top:20px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input type="checkbox" id="resetProgressCheckbox" style="width:20px; height:20px; margin:0;" ${resetProgressFlag ? 'checked' : ''}>
+                <span style="color:#e53935; font-weight:500;">🔄 重置游戏进度</span>
+            </label>
+            <p style="color:#888; font-size:12px; margin-top:8px; margin-left:30px;">
+                勾选后将清除已有的对话记录、游戏时间和角色状态，恢复到初始设定
+            </p>
+        </div>
+        ` : ''}
+    `;
+    
+    // 监听世界观类型变化，自动填充描述
+    const typeSelect = document.getElementById('worldviewType');
+    const descTextarea = document.getElementById('worldviewDesc');
+    typeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        descTextarea.value = WORLDVIEW_PRESETS[selectedType].description;
+    });
+    // 监听重置进度checkbox
+const resetCheckbox = document.getElementById('resetProgressCheckbox');
+if (resetCheckbox) {
+    resetCheckbox.addEventListener('change', function() {
+        resetProgressFlag = this.checked;
+    });
+}
+}
+    
+    
+    function renderStep2(container) {
+        const u = tempSimData.user;
+        container.innerHTML = `
+            <div class="form-group"><label>👤 名字</label><input id="userName" value="${escapeHtml(u.name)}"></div>
+            <div class="form-group"><label>🏷️ 身份</label><input id="userRole" value="${escapeHtml(u.role || '')}" placeholder="如：外门弟子、继承人、幸存者"></div>
+            <div class="form-group"><label>📝 人设</label><textarea id="userPersona" rows="2">${escapeHtml(u.persona)}</textarea></div>
+            <h4 style="margin:20px 0 12px;">📊 初始状态</h4>
+            <div class="status-vertical">
+                ${['age','money','scheme','fame','exp','appearance','fatigue'].map(s => `
+                    <div class="status-row-item"><label>${getStatLabel(s)}</label><input type="number" id="stat_${s}" value="${u.stats[s]}" ${s==='appearance'||s==='fatigue'?'min=0 max=100':''}></div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    function getStatLabel(s) {
+        const map = { age:'年龄', money:'金钱', scheme:'心机', fame:'声望', exp:'经验', appearance:'外貌 (0-100)', fatigue:'疲惫 (0-100)' };
+        return map[s] || s;
+    }
+    
+    function renderStep3(container) {
+        let html = `<div class="add-npc-btn" id="addNpcBtn">+ 添加 NPC</div>`;
+        tempSimData.npcs.forEach((npc, idx) => {
+            html += `
+                <div class="npc-collapsed-card" data-npc-idx="${idx}">
+                    <div class="npc-collapsed-header">
+                        <div class="npc-collapsed-info">
+                            <div class="npc-avatar">${npc.name.charAt(0)}</div>
+                            <div><h4>${escapeHtml(npc.name)}</h4><p>${escapeHtml(npc.role || npc.persona?.substring(0,20) || '未设置')}</p></div>
+                        </div>
+                        <div class="npc-collapsed-actions">
+                            <button class="npc-delete-btn" data-idx="${idx}">✕</button>
+                            <span class="npc-expand-icon">▶</span>
+                        </div>
+                    </div>
+                    <div class="npc-expanded-content">
+                        <div class="form-group"><label>名称</label><input class="npc-name" data-idx="${idx}" value="${escapeHtml(npc.name)}"></div>
+                        <div class="form-group"><label>身份</label><input class="npc-role" data-idx="${idx}" value="${escapeHtml(npc.role || '')}" placeholder="如：大师姐、掌门、路人"></div>
+                        <div class="form-group"><label>人设</label><textarea class="npc-persona" data-idx="${idx}" rows="2">${escapeHtml(npc.persona)}</textarea></div>
+                        <div class="status-vertical">
+                            ${['age','money','fame','exp','favor','desire'].map(s => `
+                                <div class="status-row-item"><label>${getNpcStatLabel(s)}</label><input type="number" class="npc-stat" data-idx="${idx}" data-stat="${s}" value="${npc.stats[s]}" ${s==='favor'||s==='desire'?'min=0 max=100':''}></div>
+                            `).join('')}
+                        </div>
+                        <div class="form-group"><label>👁️ 对${tempSimData.user.name || '我'}的看法</label><textarea class="npc-view-on-user" data-idx="${idx}" rows="3" placeholder="描述这个角色对主角的看法...">${escapeHtml(npc.textStats?.viewOnUser || '')}</textarea></div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        
+        container.querySelectorAll('.npc-collapsed-header').forEach(h => {
+            h.addEventListener('click', e => {
+                if (e.target.closest('.npc-delete-btn')) return;
+                h.closest('.npc-collapsed-card').classList.toggle('expanded');
+            });
+        });
+        container.querySelectorAll('.npc-delete-btn').forEach(b => {
+            b.addEventListener('click', e => {
+                e.stopPropagation();
+                tempSimData.npcs.splice(parseInt(b.dataset.idx), 1);
+                renderStep3(container);
+            });
+        });
+        document.getElementById('addNpcBtn')?.addEventListener('click', () => {
+            tempSimData.npcs.push({ 
+                id: 'npc_'+Date.now(), 
+                name: '新角色',
+                role: '',
+                persona: '', 
+                stats: { age:25, money:3000, fame:20, exp:0, favor:50, desire:10 }, 
+                textStats: { innerVoice: '', darkThought: '', viewOnUser: '' } 
+            });
+            renderStep3(container);
+        });
+    }
+    
+    function getNpcStatLabel(s) {
+        const map = { age:'年龄', money:'金钱', fame:'声望', exp:'经验', favor:'好感度 (0-100)', desire:'欲望值 (0-100)' };
+        return map[s] || s;
+    }
+    
+    function renderStep4(container) {
+        const names = [tempSimData.user.name, ...tempSimData.npcs.map(n => n.name)];
+        container.innerHTML = `
+            <p style="color:#666; margin-bottom:12px;">点击第一个名字，再点击第二个名字创建关系</p>
+            <div class="relation-nodes" id="relationNodes">${names.map(n => `<span class="relation-node" data-name="${escapeHtml(n)}">${escapeHtml(n)}</span>`).join('')}</div>
+            <p style="color:#888; font-size:12px; margin-bottom:12px;">已选择: <span id="selectedDisplay">无</span></p>
+            <div class="relation-lines" id="relationLines"></div>
+            <p style="color:#888; font-size:11px; margin-top:8px;">💡 短按关系可编辑，长按可删除</p>
+        `;
+        renderRelationLines();
+        
+        let selectedName = null;
+        container.querySelectorAll('.relation-node').forEach(node => {
+            node.addEventListener('click', () => {
+                const name = node.dataset.name;
+                if (selectedName === name) {
+                    node.classList.remove('selected');
+                    selectedName = null;
+                } else if (!selectedName) {
+                    container.querySelectorAll('.relation-node').forEach(n => n.classList.remove('selected'));
+                    selectedName = name;
+                    node.classList.add('selected');
+                } else {
+                    pendingRelation = { from: selectedName, to: name };
+                    document.getElementById('relationModalTitle').textContent = `${selectedName} ↔ ${name}`;
+                    document.getElementById('relationDescInput').value = '';
+                    document.getElementById('relationModal').classList.add('active');
+                    
+                    container.querySelectorAll('.relation-node').forEach(n => n.classList.remove('selected'));
+                    selectedName = null;
+                }
+                document.getElementById('selectedDisplay').textContent = selectedName || '无';
+            });
+        });
+    }
+    
+    function renderRelationLines() {
+        const container = document.getElementById('relationLines');
+        if (!tempSimData.relations.length) {
+            container.innerHTML = '<p style="color:#aaa; text-align:center; padding:16px;">暂无关系，点击上方名字创建</p>';
+            return;
+        }
+        
+        let html = '';
+        tempSimData.relations.forEach((rel, idx) => {
+            const displayDesc = rel.desc.length > 7 ? rel.desc.substring(0, 7) + '…' : rel.desc;
+            html += `
+                <div class="relation-item-new">
+                    <span class="relation-name-left">${escapeHtml(rel.from)}</span>
+                    <span class="relation-desc-middle" data-relation-idx="${idx}" title="${escapeHtml(rel.desc)}">${escapeHtml(displayDesc)}</span>
+                    <span class="relation-name-right">${escapeHtml(rel.to)}</span>
+                    <button class="relation-delete-btn" data-delete-idx="${idx}">✕</button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        
+        container.querySelectorAll('.relation-desc-middle').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(el.dataset.relationIdx);
+                editingRelationIndex = idx;
+                const rel = tempSimData.relations[idx];
+                document.getElementById('editRelationTitle').textContent = `${rel.from} ↔ ${rel.to}`;
+                document.getElementById('editRelationDescInput').value = rel.desc;
+                document.getElementById('editRelationModal').classList.add('active');
+            });
+            
+            let pressTimer;
+            el.addEventListener('mousedown', () => {
+                pressTimer = setTimeout(() => {
+                    const idx = parseInt(el.dataset.relationIdx);
+                    if (confirm('删除这个关系？')) {
+                        tempSimData.relations.splice(idx, 1);
+                        renderRelationLines();
+                    }
+                }, 500);
+            });
+            el.addEventListener('mouseup', () => clearTimeout(pressTimer));
+            el.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+            el.addEventListener('touchstart', (e) => {
+                pressTimer = setTimeout(() => {
+                    const idx = parseInt(el.dataset.relationIdx);
+                    if (confirm('删除这个关系？')) {
+                        tempSimData.relations.splice(idx, 1);
+                        renderRelationLines();
+                    }
+                }, 500);
+            });
+            el.addEventListener('touchend', () => clearTimeout(pressTimer));
+            el.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        });
+        
+        container.querySelectorAll('.relation-delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.deleteIdx);
+                if (confirm('删除这个关系？')) {
+                    tempSimData.relations.splice(idx, 1);
+                    renderRelationLines();
+                }
+            });
+        });
+    }
+    
+    function renderStep5(container) {
+        container.innerHTML = `
+            <p style="color:#666; margin-bottom:16px;">设置触发事件</p>
+            <div id="eventsList"></div>
+            <div class="add-npc-btn" id="addEventBtn">+ 添加事件</div>
+        `;
+        renderEventsList();
+        document.getElementById('addEventBtn')?.addEventListener('click', () => {
+            tempSimData.events.push({ conditionText: '', description: '新事件' });
+            renderEventsList();
+        });
+    }
+    
+    function renderEventsList() {
+        const c = document.getElementById('eventsList');
+        if (!tempSimData.events.length) { 
+            c.innerHTML = '<p style="color:#aaa; padding:12px;">暂无事件</p>'; 
+            return; 
+        }
+        c.innerHTML = tempSimData.events.map((e, i) => `
+            <div class="event-item">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span>事件 ${i+1}</span>
+                    <span style="cursor:pointer;" data-delete-event="${i}">✕</span>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>📋 判定条件</label>
+                    <input class="event-condition" data-idx="${i}" value="${escapeHtml(e.conditionText || '')}" placeholder="如：经验>=100 或 金钱>5000">
+                </div>
+                <div class="form-group">
+                    <label>📝 事件描述</label>
+                    <input class="event-desc" data-idx="${i}" value="${escapeHtml(e.description)}" placeholder="触发后显示的内容">
+                </div>
+            </div>
+        `).join('');
+        
+        c.querySelectorAll('[data-delete-event]').forEach(b => {
+            b.addEventListener('click', () => { 
+                tempSimData.events.splice(parseInt(b.dataset.deleteEvent), 1); 
+                renderEventsList(); 
+            });
+        });
+    }
+    
+    function collectStepData() {
+        if (currentStep === 1) {
+            // 保存完整的描述文本
+            tempSimData.worldview = document.getElementById('worldviewDesc')?.value;
+            // 新增：保存选中的世界观类型
+            tempSimData.worldviewType = document.getElementById('worldviewType')?.value || '仙侠';
+            tempSimData.name = document.getElementById('simName')?.value;
+            const y = parseInt(document.getElementById('startYear')?.value) || 1024;
+            const m = parseInt(document.getElementById('startMonth')?.value) || 3;
+            const d = parseInt(document.getElementById('startDay')?.value) || 15;
+            tempSimData.startTime = { year: y, month: m, day: d, hour: 8 };
+        } else if (currentStep === 2) {
+            tempSimData.user.name = document.getElementById('userName')?.value || '我';
+            tempSimData.user.role = document.getElementById('userRole')?.value || '';
+            tempSimData.user.persona = document.getElementById('userPersona')?.value;
+            ['age','money','scheme','fame','exp','appearance','fatigue'].forEach(s => {
+                tempSimData.user.stats[s] = parseInt(document.getElementById(`stat_${s}`)?.value) || 0;
+            });
+        } else if (currentStep === 3) {
+            document.querySelectorAll('.npc-name').forEach(i => { const idx=i.dataset.idx; if(tempSimData.npcs[idx]) tempSimData.npcs[idx].name=i.value; });
+            document.querySelectorAll('.npc-role').forEach(i => { const idx=i.dataset.idx; if(tempSimData.npcs[idx]) tempSimData.npcs[idx].role=i.value; });
+            document.querySelectorAll('.npc-persona').forEach(i => { const idx=i.dataset.idx; if(tempSimData.npcs[idx]) tempSimData.npcs[idx].persona=i.value; });
+            document.querySelectorAll('.npc-stat').forEach(i => { const idx=i.dataset.idx; if(tempSimData.npcs[idx]) tempSimData.npcs[idx].stats[i.dataset.stat]=parseInt(i.value)||0; });
+            document.querySelectorAll('.npc-view-on-user').forEach(i => { 
+                const idx=i.dataset.idx; 
+                if(tempSimData.npcs[idx]) {
+                    if (!tempSimData.npcs[idx].textStats) tempSimData.npcs[idx].textStats = {};
+                    tempSimData.npcs[idx].textStats.viewOnUser = i.value;
+                }
+            });
+        } else if (currentStep === 5) {
+            document.querySelectorAll('.event-condition').forEach(inp => { 
+                const i = inp.dataset.idx; 
+                if(tempSimData.events[i]) tempSimData.events[i].conditionText = inp.value; 
+            });
+            document.querySelectorAll('.event-desc').forEach(inp => { 
+                const i = inp.dataset.idx; 
+                if(tempSimData.events[i]) tempSimData.events[i].description = inp.value; 
+            });
+        }
+    }
+    
+    function saveSimulator() {
+    collectStepData();
+    const st = tempSimData.startTime;
+    
+    tempSimData.npcs.forEach(npc => {
+        if (!npc.textStats) npc.textStats = {};
+        if (!npc.textStats.innerVoice) npc.textStats.innerVoice = '';
+        if (!npc.textStats.darkThought) npc.textStats.darkThought = '';
+    });
+    
+    // 确保user有role字段
+    if (!tempSimData.user.role) tempSimData.user.role = '';
+
+    // 检查是否勾选了重置进度
+    const resetProgress = resetProgressFlag;
+    
+    // 如果是编辑现有模拟器且没有勾选重置，保留运行时数据
+    let preservedData = {};
+    if (editingSimulator && !resetProgress) {
+        preservedData = {
+            messages: editingSimulator.messages || [{ type:'system', content:'模拟器已更新，故事继续...' }],
+            gameTime: editingSimulator.gameTime || { ...st },
+            actionPoints: editingSimulator.actionPoints ?? 10,
+            maxActionPoints: editingSimulator.maxActionPoints ?? 10,
+            userStats: editingSimulator.user?.stats ? { ...editingSimulator.user.stats } : null,
+            saves: editingSimulator.saves || [],
+            items: editingSimulator.items || []
+        };
+        
+        // 添加一条系统消息提示模拟器已被编辑
+        if (preservedData.messages) {
+            preservedData.messages.push({ 
+                type: 'system', 
+                content: '📝 模拟器设定已更新' 
+            });
+        }
+    }
+
+    const sim = {
+        id: editingSimulator?.id || 'sim_'+Date.now(),
+        name: tempSimData.name || '未命名',
+        worldview: tempSimData.worldview,
+        worldviewType: tempSimData.worldviewType || '仙侠',
+        user: JSON.parse(JSON.stringify(tempSimData.user)),
+        npcs: JSON.parse(JSON.stringify(tempSimData.npcs)),
+        relations: JSON.parse(JSON.stringify(tempSimData.relations)),
+        events: JSON.parse(JSON.stringify(tempSimData.events)),
+        items: resetProgress ? [] : (preservedData.items || JSON.parse(JSON.stringify(tempSimData.items || []))),
+        createdAt: editingSimulator?.createdAt || Date.now(),
+        lastPlayed: Date.now(),
+        
+        // 根据是否重置进度来决定使用保留数据还是新数据
+        actionPoints: resetProgress ? 10 : (preservedData.actionPoints ?? 10),
+        maxActionPoints: resetProgress ? 10 : (preservedData.maxActionPoints ?? 10),
+        gameTime: resetProgress ? { year: st.year, month: st.month, day: st.day, hour: 8 } : (preservedData.gameTime || { year: st.year, month: st.month, day: st.day, hour: 8 }),
+        startTime: { ...st },
+        messages: resetProgress ? [{ type:'system', content:'模拟器已更新，故事重新开始...' }] : (preservedData.messages || [{ type:'system', content:'模拟器已创建，故事开始...' }]),
+        saves: resetProgress ? [] : (preservedData.saves || [])
+    };
+    
+    // 处理用户状态：如果重置进度，使用编辑时设置的状态；否则保留游玩状态
+    if (resetProgress) {
+        sim.user.stats = { ...tempSimData.user.stats };
+    } else if (editingSimulator && preservedData.userStats) {
+        sim.user.stats = { ...preservedData.userStats };
+    }
+    
+    if (editingSimulator) {
+        const idx = simulators.findIndex(s => s.id === editingSimulator.id);
+        if (idx!==-1) simulators[idx] = sim;
+    } else {
+        simulators.push(sim);
+    }
+    saveSimulators();
+    renderHome();
+    switchPage('home');
+}
+    function deleteSimulator() {
+    if (!editingSimulator) return;
+    
+    if (!confirm(`确定要删除模拟器"${editingSimulator.name}"吗？此操作不可恢复。`)) {
+        return;
+    }
+    
+    const index = simulators.findIndex(s => s.id === editingSimulator.id);
+    if (index !== -1) {
+        simulators.splice(index, 1);
+        saveSimulators();
+    }
+    
+    if (currentSimulator && currentSimulator.id === editingSimulator.id) {
+        currentSimulator = null;
+    }
+    
+    editingSimulator = null;
+    renderHome();
+    switchPage('home');
+}
+    function renderPlayPage() {
+        if (!currentSimulator) return;
+        const t = currentSimulator.gameTime;
+        document.getElementById('timeDisplay').textContent = `${t.year}年${t.month}月${t.day}日 ${t.hour}时`;
+        // 行动点显示已移除
+        renderEventStream();
+    }
+    
+    function renderEventStream() {
+    const c = document.getElementById('eventStream');
+    const msgs = currentSimulator.messages || [];
+    
+    c.innerHTML = msgs.map((m, index) => {
+        if (m.type === 'system') {
+            const selectedClass = multiSelectMode && selectedMessageIndices.has(index) ? 'selected' : '';
+            const selectableClass = multiSelectMode ? 'selectable' : '';
+            return `<div class="system-message ${selectableClass} ${selectedClass}" data-index="${index}">
+                <span class="select-checkbox"></span>
+                ${escapeHtml(m.content)}
+            </div>`;
+        } else {
+            const selectedClass = multiSelectMode && selectedMessageIndices.has(index) ? 'selected' : '';
+            const selectableClass = multiSelectMode ? 'selectable' : '';
+            return `<div class="message-row ${m.speaker===currentSimulator.user.name?'right':'left'} ${selectableClass} ${selectedClass}" data-index="${index}">
+                <span class="select-checkbox"></span>
+                <span class="name-tag" data-char="${escapeHtml(m.speaker)}">${escapeHtml(m.speaker)}</span>
+                <div class="bubble">${escapeHtml(m.content)}</div>
+            </div>`;
+        }
+    }).join('');
+    
+    c.scrollTop = c.scrollHeight;
+    
+    c.querySelectorAll('.name-tag').forEach(t => t.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showStatus(t.dataset.char);
+    }));
+    
+    c.querySelectorAll('.message-row, .system-message').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (e.target.classList.contains('name-tag')) return;
+            
+            const index = parseInt(el.dataset.index);
+            
+            if (multiSelectMode) {
+                e.stopPropagation();
+                toggleMessageSelection(index, el);
+            } else {
+                showBubbleMenu(e, el, index);
+            }
+        });
+    });
+    
+    updateSelectedCount();
+}
+    
+    function addSystemMessage(content, fullText) {
+    const message = { type: 'system', content: content };
+    if (fullText) {
+        message.fullText = fullText;
+    }
+    currentSimulator.messages.push(message);
+    renderEventStream();
+    saveSimulators();
+}
+    
+    function addBubbleMessage(speaker, content, fullText) {
+    const message = { type: 'bubble', speaker: speaker, content: content };
+    if (fullText) {
+        message.fullText = fullText;
+    }
+    currentSimulator.messages.push(message);
+    renderEventStream();
+}
+    
+    function renderStatRow(label, value, max = null) {
+        if (max) {
+            const percent = Math.min((value / max) * 100, 100);
+            return `<div class="stat-row">
+                <span>${label}</span>
+                <span>${value}/${max}</span>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:${percent}%"></div></div>
+            </div>`;
+        } else {
+            return `<div class="stat-row"><span>${label}</span><span>${value}</span></div>`;
+        }
+    }
+    
+function showBubbleMenu(e, element, index) {
+    e.stopPropagation();
+    
+    const menu = document.getElementById('bubbleMenu');
+    const rect = element.getBoundingClientRect();
+    
+    currentBubbleMenuTarget = { element, index };
+    
+    // 获取当前消息
+    const message = currentSimulator.messages[index];
+    
+    // 所有消息都显示重回按钮
+    const rewindBtn = menu.querySelector('[data-action="rewind"]');
+    if (rewindBtn) {
+        rewindBtn.style.display = 'block';
+    }
+    
+    // 只有NPC消息才显示修改按钮
+    const editBtn = menu.querySelector('[data-action="edit"]');
+    if (editBtn) {
+        if (message && message.type === 'bubble' && message.speaker !== currentSimulator.user.name) {
+            editBtn.style.display = 'block';
+        } else {
+            editBtn.style.display = 'none';
+        }
+    }
+
+    // 只有有原文的消息才显示查看原文按钮
+    const viewFullTextBtn = menu.querySelector('[data-action="viewFullText"]');
+    if (viewFullTextBtn) {
+        if (message && message.fullText) {
+            viewFullTextBtn.style.display = 'block';
+        } else {
+            viewFullTextBtn.style.display = 'none';
+        }
+    }
+
+    // 先让菜单显示但不可见，以便获取其真实尺寸
+    menu.style.visibility = 'hidden';
+    menu.classList.add('active');
+    
+    // 获取菜单尺寸和视口尺寸
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let left = rect.left;
+    let top = rect.bottom + 4;
+    
+    // 判断消息是靠右的（用户自己的消息）
+    const isRightMessage = element.classList.contains('right');
+    
+    if (isRightMessage) {
+        left = rect.right - menuWidth;
+    }
+    
+    // 水平边界检测
+    const padding = 8;
+    if (left < padding) {
+        left = padding;
+    } else if (left + menuWidth > viewportWidth - padding) {
+        left = viewportWidth - menuWidth - padding;
+    }
+    
+    // 垂直边界检测：下方不够就翻到上方
+    if (top + menuHeight > viewportHeight - padding) {
+        top = rect.top - menuHeight - 4;
+        if (top < padding) {
+            top = viewportHeight - menuHeight - padding;
+        }
+    }
+    
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.visibility = 'visible';
+    
+    const closeMenu = (event) => {
+        if (!menu.contains(event.target)) {
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 10);
+}
+
+function deleteSingleMessage(index) {
+    if (index >= 0 && index < currentSimulator.messages.length) {
+        currentSimulator.messages.splice(index, 1);
+        renderEventStream();
+        saveSimulators();
+    }
+}
+
+function editMessage(index) {
+    if (!currentSimulator || index < 0 || index >= currentSimulator.messages.length) return;
+    
+    const message = currentSimulator.messages[index];
+    if (message.type !== 'bubble') {
+        addSystemMessage('⚠️ 只能修改对话消息');
+        return;
+    }
+    
+    const newContent = prompt('修改消息内容：', message.content);
+    if (newContent !== null && newContent.trim() !== '') {
+        message.content = newContent.trim();
+        renderEventStream();
+        saveSimulators();
+        addSystemMessage(`✏️ 已修改消息`);
+    }
+}
+
+// 重回功能：删除点击消息之后的所有内容，并重新请求AI回复（如果是用户消息则自动请求AI）
+async function rewindFromMessage(index) {
+    if (!currentSimulator) return;
+    
+    const messages = currentSimulator.messages;
+    const clickedMessage = messages[index];
+    
+    if (!clickedMessage) {
+        addSystemMessage('⚠️ 无效的消息');
+        return;
+    }
+    
+    const deleteCount = messages.length - index - 1;
+    
+    if (deleteCount <= 0) {
+        addSystemMessage('⚠️ 这条消息之后没有内容可删除');
+        return;
+    }
+    
+    const messagePreview = clickedMessage.type === 'system' 
+        ? clickedMessage.content.substring(0, 30) 
+        : `${clickedMessage.speaker}: ${clickedMessage.content.substring(0, 30)}`;
+    
+    if (!confirm(`确定重回吗？将删除此后的 ${deleteCount} 条消息。`)) {
+        return;
+    }
+    
+    // 删除点击消息之后的所有内容（保留当前消息）
+    messages.splice(index + 1);
+    
+    // 添加系统提示
+    addSystemMessage(`↩️ 已重回至"${messagePreview}..."`);
+    
+    renderEventStream();
+    saveSimulators();
+    
+    // 如果点击的是用户消息，自动触发AI回复
+    if (clickedMessage.type === 'bubble' && clickedMessage.speaker === currentSimulator.user.name) {
+        setTimeout(async () => {
+            await getAIReply();
+        }, 300);
+    }
+}
+
+function enterMultiSelectMode(initialIndex = null) {
+    multiSelectMode = true;
+    selectedMessageIndices.clear();
+    
+    if (initialIndex !== null) {
+        selectedMessageIndices.add(initialIndex);
+    }
+    
+    document.getElementById('multiSelectBar').classList.add('active');
+    document.getElementById('bubbleMenu').classList.remove('active');
+    document.querySelector('.input-area').style.marginBottom = '60px';
+    
+    renderEventStream();
+}
+
+function exitMultiSelectMode() {
+    multiSelectMode = false;
+    selectedMessageIndices.clear();
+    document.getElementById('multiSelectBar').classList.remove('active');
+    document.querySelector('.input-area').style.marginBottom = '0';
+    renderEventStream();
+}
+
+function toggleMessageSelection(index, element) {
+    if (selectedMessageIndices.has(index)) {
+        selectedMessageIndices.delete(index);
+        element.classList.remove('selected');
+    } else {
+        selectedMessageIndices.add(index);
+        element.classList.add('selected');
+    }
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const count = selectedMessageIndices.size;
+    document.getElementById('selectedCount').textContent = `已选择 ${count} 项`;
+}
+
+function deleteSelectedMessages() {
+    if (selectedMessageIndices.size === 0) return;
+    
+    if (!confirm(`确定删除选中的 ${selectedMessageIndices.size} 条消息吗？`)) return;
+    
+    const indicesToDelete = Array.from(selectedMessageIndices).sort((a, b) => b - a);
+    indicesToDelete.forEach(index => {
+        if (index >= 0 && index < currentSimulator.messages.length) {
+            currentSimulator.messages.splice(index, 1);
+        }
+    });
+    
+    exitMultiSelectMode();
+    saveSimulators();
+}
+
+    function showStatus(name) {
+        const modal = document.getElementById('statusModal');
+        const content = document.getElementById('statusCardContent');
+        let html = '';
+        
+        if (name === currentSimulator.user.name) {
+            const u = currentSimulator.user;
+            html = `<h3>👤 ${escapeHtml(u.name)}</h3>
+                    <p style="margin-bottom:8px; color:#666;">${escapeHtml(u.role || '未知身份')}</p>
+                    <p style="margin-bottom:16px;">${escapeHtml(u.persona || '暂无介绍')}</p>
+                    <div class="status-section">
+                        <h4>📊 基础属性</h4>
+                        ${renderStatRow('年龄', u.stats.age)}
+                        ${renderStatRow('金钱', u.stats.money)}
+                        ${renderStatRow('心机', u.stats.scheme)}
+                        ${renderStatRow('声望', u.stats.fame)}
+                        ${renderStatRow('经验', u.stats.exp)}
+                        ${renderStatRow('外貌', u.stats.appearance, 100)}
+                        ${renderStatRow('疲惫', u.stats.fatigue, 100)}
+                    </div>`;
+        } else {
+            const npc = currentSimulator.npcs.find(n => n.name === name);
+            if (npc) {
+                const viewOnUser = npc.textStats?.viewOnUser || '暂无';
+                const innerVoice = npc.textStats?.innerVoice || '暂无';
+                const darkThought = npc.textStats?.darkThought || '暂无';
+                
+                html = `<h3>👥 ${escapeHtml(npc.name)}</h3>
+                        <p style="margin-bottom:16px; color:#666;">${escapeHtml(npc.role || '未知身份')}</p>
+                        <div class="status-section">
+                            <h4>📊 属性</h4>
+                            ${renderStatRow('年龄', npc.stats.age)}
+                            ${renderStatRow('金钱', npc.stats.money)}
+                            ${renderStatRow('声望', npc.stats.fame)}
+                            ${renderStatRow('经验', npc.stats.exp)}
+                            ${renderStatRow('好感度', npc.stats.favor, 100)}
+                            ${renderStatRow('欲望值', npc.stats.desire, 100)}
+                        </div>
+                        <div class="status-section">
+                            <h4>💭 心声</h4>
+                            <p style="background:#f5f5f5; padding:12px; border-radius:8px; font-size:14px; line-height:1.5;">
+                                ${escapeHtml(innerVoice)}
+                            </p>
+                        </div>
+                        <div class="status-section">
+                            <h4>🖤 深层坏心思</h4>
+                            <p style="background:#f5f5f5; padding:12px; border-radius:8px; font-size:14px; line-height:1.5;">
+                                ${escapeHtml(darkThought)}
+                            </p>
+                        </div>
+                        <div class="status-section">
+                            <h4>👁️ 对${escapeHtml(currentSimulator.user.name)}的看法</h4>
+                            <p style="background:#f5f5f5; padding:12px; border-radius:8px; font-size:14px; line-height:1.5;">
+                                ${escapeHtml(viewOnUser)}
+                            </p>
+                        </div>`;
+            }
+        }
+        
+        content.innerHTML = html + `<div class="close-modal" id="closeModal">关闭</div>`;
+        modal.classList.add('active');
+        document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+        modal.onclick = e => { if(e.target===modal) modal.classList.remove('active'); };
+    }
+    
+    function advanceTime() {
+        // 行动点系统已移除，时间推进现在由AI响应控制
+        addSystemMessage('⏰ 时间推进功能已整合到AI剧情中，请通过对话触发剧情发展');
+    }
+    
+    function checkEvents() {
+        const stats = currentSimulator.user.stats;
+        currentSimulator.events?.forEach(event => {
+            if (event.conditionText) {
+                const match = event.conditionText.match(/([a-zA-Z]+)([<>=]+)(\d+)/);
+                if (match) {
+                    const stat = match[1];
+                    const operator = match[2];
+                    const value = parseInt(match[3]);
+                    let triggered = false;
+                    if (operator === '>=') triggered = stats[stat] >= value;
+                    else if (operator === '>') triggered = stats[stat] > value;
+                    else if (operator === '=') triggered = stats[stat] === value;
+                    
+                    if (triggered) {
+                        addSystemMessage(`🎉 事件触发: ${event.description}`);
+                    }
+                }
+            }
+        });
+    }
+    
+    function handleSend() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        if (inputMode === 'say') {
+            addBubbleMessage(currentSimulator.user.name, text);
+        } else {
+            addSystemMessage(`📝 ${text}`);
+        }
+        input.value = '';
+        // 行动点扣减已移除
+        saveSimulators();
+    }
+    
+    // ========== 替换原有 getAIReply 函数 ==========
+// ========== 修改后的 getAIReply 函数 ==========
+async function getAIReply() {
+    const npcs = currentSimulator.npcs;
+    if (!npcs || npcs.length === 0) {
+        addSystemMessage('⚠️ 没有可对话的角色');
+        return;
+    }
+    
+    const lastMessages = currentSimulator.messages.filter(m => m.type === 'bubble');
+    const lastUserMessage = [...lastMessages].reverse().find(m => m.speaker === currentSimulator.user.name);
+    
+    if (!lastUserMessage) {
+        addSystemMessage('💡 先说点什么吧');
+        return;
+    }
+    
+    addSystemMessage('🤖 AI正在思考...');
+    const thinkingMessageIndex = currentSimulator.messages.length - 1;
+    
+    try {
+        const context = AIService.buildStoryContext(currentSimulator);
+context.worldviewType = currentSimulator.worldviewType || '仙侠';
+context.lastUserMessage = lastUserMessage.content;
+
+// 构建API用的历史消息格式（保持兼容）
+context.history = currentSimulator.messages
+    .filter(m => m.type === 'bubble')
+    .slice(-10)
+    .map(m => ({
+        role: m.speaker === currentSimulator.user.name ? 'user' : 'assistant',
+        content: m.content
+    }));
+
+const systemPrompt = buildMultiNPCSystemPrompt(context);
+        
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...(context.history || []),
+            { role: 'user', content: lastUserMessage.content }
+        ];
+        
+        const reply = await callRealAPIForMulti(messages);
+        
+        if (currentSimulator.messages[thinkingMessageIndex]?.content === '🤖 AI正在思考...') {
+            currentSimulator.messages.splice(thinkingMessageIndex, 1);
+        }
+        
+        const parsedBlocks = parseMultiResponse(reply);
+
+// 提取完整原文
+const fullTextBlock = parsedBlocks.find(b => b.type === 'fullText');
+const fullText = fullTextBlock ? fullTextBlock.content : '';
+
+parsedBlocks.forEach(block => {
+    if (block.type === 'system') {
+        addSystemMessage(block.content, fullText);
+    } else if (block.type === 'bubble') {
+        addBubbleMessage(block.speaker, block.content, fullText);
+    } else if (block.type === 'fullText') {
+        // 跳过，不渲染到界面上
+    } else if (block.type === 'stateUpdate') {
+        applyStateUpdates(block.updates, block.sourceNpcName);
+    }
+});
+        
+        if (parsedBlocks.length === 0) {
+            addSystemMessage('🤖 AI没有返回有效内容，请重试');
+        }
+        
+        // 行动点扣减已移除
+        saveSimulators();
+        
+    } catch (error) {
+        console.error('AI reply error:', error);
+        if (currentSimulator.messages[thinkingMessageIndex]?.content === '🤖 AI正在思考...') {
+            currentSimulator.messages.splice(thinkingMessageIndex, 1);
+        }
+        addSystemMessage('⚠️ AI回复失败，请重试');
+        renderEventStream();
+        saveSimulators();
+    }
+}
+    
+    /**
+     * 解析AI返回的结构化内容（增强版：修复标签残留，支持心声提取）
+     */
+// ========== 真实API调用封装 ==========
+async function callRealAPIForMulti(messages) {
+    const config = getApiConfig();
+    if (!config.apiKey) {
+        showApiToast('未配置API Key', 'error', 'NO_API_KEY');
+        return `【思维链】这是测试数据。\n【响应内容】\n【旁白:一阵微风吹过，气氛有些微妙。】\n【char_云瑶_动作:云瑶轻抚长剑，目光深邃。】\n【char_云瑶_语言:你来了。】\n【char_墨渊_动作:墨渊从阴影中走出，嘴角挂着一丝冷笑。】\n【char_墨渊_语言:林清，好久不见。】\n【状态栏数值变化:user.exp:+5, npc.云瑶.favor:+2, npc.墨渊.desire:-1】`;
+    }
+
+    showApiToast('AI正在调用中...', 'loading');
+
+    try {
+        const response = await fetch(config.baseUrl + '/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.apiKey}`
+            },
+            body: JSON.stringify({
+                model: config.model,
+                messages: messages,
+                temperature: config.temperature,
+                max_tokens: config.maxTokens,
+                top_p: config.topP
+            })
+        });
+        
+        if (!response.ok) {
+        var errorData = null;
+        try { errorData = await response.json(); } catch(e) {}
+        var errorMessage = (errorData && errorData.error && errorData.error.message) ? errorData.error.message : ('HTTP ' + response.status);
+        var errorMap = {
+            400: { msg: '请求格式错误', code: 'BAD_REQUEST' },
+            401: { msg: 'API Key无效或已过期', code: 'UNAUTHORIZED' },
+            402: { msg: '账户余额不足', code: 'PAYMENT_REQUIRED' },
+            403: { msg: '无权访问此资源', code: 'FORBIDDEN' },
+            404: { msg: 'API端点不存在', code: 'NOT_FOUND' },
+            429: { msg: '请求频率超限，请稍后再试', code: 'RATE_LIMITED' },
+            500: { msg: '服务器内部错误', code: 'SERVER_ERROR' },
+            502: { msg: '网关错误', code: 'BAD_GATEWAY' },
+            503: { msg: '服务暂不可用', code: 'SERVICE_UNAVAILABLE' }
+        };
+        var errorInfo = errorMap[response.status] || { msg: errorMessage, code: 'HTTP_' + response.status };
+        showApiToast(errorInfo.msg, 'error', errorInfo.code);
+        throw new Error(errorMessage);
+    }
+    
+    const data = await response.json();
+    
+    if (data.usage) {
+        lastTokenUsage = {
+            prompt: data.usage.prompt_tokens || 0,
+            completion: data.usage.completion_tokens || 0,
+            total: data.usage.total_tokens || 0
+        };
+        updateTokenDisplay();
+    }
+    
+    showApiToast('AI响应成功', 'success');
+    
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+        return data.choices[0].message.content;
+    } else {
+        throw new Error('Invalid API response');
+    }
+} catch (error) {
+    console.error('AI API error:', error);
+    if (error.name === 'TypeError' && error.message.indexOf('fetch') !== -1) {
+        showApiToast('网络连接失败，请检查网络和API地址', 'error', 'NETWORK_ERROR');
+    }
+    throw error;
+}
+}
+
+// ========== 新的多角色提示词构造器（增强版：场景感知+文风强化） ==========
+function buildMultiNPCSystemPrompt(context) {
+    const worldview = context.worldview || '';
+    const worldviewType = context.worldviewType || '仙侠';
+    const stylePrompt = WORLDVIEW_PRESETS[worldviewType]?.stylePrompt || '语言风格自然流畅。';
+    const keywords = WORLDVIEW_PRESETS[worldviewType]?.keywords || [];
+    
+    const presentNpcs = context.presentNpcs || [];
+    const allNpcs = context.allNpcs || context.npcs || [];
+    
+    const presentNpcSummaries = presentNpcs.map(npc => {
+        const relation = (context.relations || []).find(r => 
+            (r.from === npc.name && r.to === context.user.name) ||
+            (r.to === npc.name && r.from === context.user.name)
+        );
+        return `【${npc.name}】← 在场
+- 身份：${npc.role || '未知'}
+- 人设：${npc.persona || '暂无'}
+- 与主角关系：${relation?.desc || '无特殊关系'}
+- 好感度：${npc.stats.favor}/100
+- 欲望值：${npc.stats.desire}/100`;
+    }).join('\n\n');
+    
+    const absentNpcs = allNpcs.filter(n => !presentNpcs.some(p => p.name === n.name));
+    const absentNpcSummary = absentNpcs.length > 0 
+        ? `\n【不在场的角色（不可突然出现）】\n` + absentNpcs.map(n => `- ${n.name}（${n.role || '未知'}）`).join('\n')
+        : '';
+    
+    const recentSystems = context.recentSystems || [];
+    const recentDialogue = (context.recentMessages || []).slice(-8).map(m => 
+        `${m.speaker}：${m.content}`
+    ).join('\n');
+    
+    const user = context.user;
+    const userStats = user.stats;
+    const userSummary = `年龄:${userStats.age} 金钱:${userStats.money} 心机:${userStats.scheme} 声望:${userStats.fame} 经验:${userStats.exp} 外貌:${userStats.appearance} 疲惫:${userStats.fatigue}`;
+    
+    return `你是一个会讲故事的人，不是一个写作文的AI。你正在主导一段剧情，扮演其中多个角色。
+
+【核心指令】
+根据当前语境，决定由哪个角色（或旁白）来回应主角。输出严格使用规定的标签格式。
+
+【世界观】
+类型：${worldviewType}
+描述：${worldview}
+相关元素：${keywords.join('、')}
+${stylePrompt}
+
+【文风铁律——这比什么都重要】
+你的写法必须是"人在看"，而不是"上帝在俯瞰"。每一段描写都应该像是某个在场的人亲眼看到的、心里嘀咕的。叙述语言可以松弛，可以有烟火气，可以偶尔用口语化的短句——就像一个人在讲故事，不是AI在写满分作文。
+
+✅ 正确的写法：
+· 旁白有叙述者的声音和判断，比如："来的倒很多，可一个能入眼的都没有。"
+· 细节是具体的、个人化的——鼻尖的痣、袖口的褶皱、指甲缝里的灰，而不是"英俊潇洒"、"气质出尘"这类空话。
+· 角色的情绪通过行为和微小的选择流露——他脑子一热举起了绣球、他直直地回视没有躲闪——而不是"他内心涌起一股暖流"。
+· 人物观察人物时，看到的是自己在意的东西：一个人紧张可能注意到对方的手指在桌面上轻敲，而不是注意到对方的"气场"。
+· 可以有人味的小嘀咕、小判断，比如"搁现代收拾收拾能直接出道的程度"、"平平淡淡才是真"。
+
+❌ 绝对禁止的AI口癖句式：
+· "不仅...更..." 的所有变体
+· "内心涌起/泛起/升腾..." 直接陈述情绪
+· "目光中多了几分/闪过/透着..." 眼睛不是LED屏
+· "仿佛在说/仿佛在嘲笑/仿佛在见证"——禁止用"仿佛"代替实际描写
+· "冷艳"、"深邃"、"邪魅"、"清冷的气质" ——禁止用套话标签概括一个人，要写他具体做了什么、长了什么、手怎么放的
+· "气氛凝固/微妙/变得暧昧"——气氛是通过人的感受和动作出来的，不是直接报的
+· "XX淡淡地/微微地/轻轻地" ——除非这个动作确实需要这么写，否则少用"淡淡微微轻轻"
+
+【当前场景】
+📍 时间：${context.gameTime.year}年${context.gameTime.month}月${context.gameTime.day}日 ${context.gameTime.hour}时
+📍 地点描写：${context.currentScene || '场景初始'}
+
+【近期对话】
+${recentDialogue || '游戏刚刚开始。'}
+
+【主角】
+${user.name} | ${user.role || '未知身份'}
+人设：${user.persona || '暂无'}
+状态：${userSummary}
+
+【在场角色】
+${presentNpcSummaries || '暂无角色在场'}
+${absentNpcSummary}
+
+【输出规则】
+1. 只有【在场角色】可以发言/行动。不在场的不准出现。
+2. 每个【char_XXX_动作】必须以角色名开头，只写一个角色的行为。
+3. 旁白采用有叙述者声音的写法——可以有小判断、小嘀咕，从某个角色的感知角度来写，不要空洞的上帝视角。
+4. 动作描写要有画面感，盯住具体的东西写：手指怎么放的、眼神落在哪、衣料怎么动的。
+5. 状态变化合理就行：好感度基于对话内容，经验值基于学到了什么，疲惫值根据活动强度。
+6. 输出顺序：先旁白/环境，再有动作，再有语言。动作和语言配对出现。
+
+【文风参考——请严格模仿这种"人味"】
+以下是好的写法，请学习它的节奏、细节方式和叙述语气：
+
+这已经是第三日了。楼下来的人倒是很多，可一个能入眼的都没有，反而招惹了几个泼皮，日日都在下头嬉笑叫嚣。
+他一出来，外头一下子安静了好多。果然不管古今也不管男女，漂亮都是大杀器。
+他笑盈盈看了一圈，正打算转身回去，忽然在人群里瞧见一个年轻男子。那人站在人群边缘，一身缁色窄袖袍，衣袍上一丝花纹也无，通身无饰，却是鹤立鸡群的好看。从头到脚都惊人得合他心意，以至于他心跳都漏了一拍。
+他冲着对方笑了一下。对方也不扭捏，直直地回视着他。
+近看，快比他高一头了。年轻白皙的脸，却生了一双微挑的凤眼，被黑沉沉的瞳仁压了下来。鼻尖还有一颗小痣。
+他的眸子很黑，瞳仁比眼白多，以至于看起来笑意都达不到眼底，但声音极其温柔，问他："你是专门给我的么？"
+
+注意：上面这段没有"内心涌起暖流"、没有"不仅...更..."、没有"气氛微妙"——情绪全在行为和细节里。
+
+【你的任务】
+现在，主角做了/说了："${context.lastUserMessage || '（无具体内容）'}"
+
+思考：在场角色中谁最可能回应？以什么方式？然后按格式输出。
+
+【输出格式】
+第一部分：【思维链】（简要的导演思路）
+
+第二部分：【完整原文】
+先写一段完整的、流畅的故事叙事。把所有角色的动作、语言、旁白和环境描写自然地融合成一段完整的文字，不需要任何标签。这就像是小说中的一段。
+
+第三部分：【结构化内容】
+将【完整原文】中的内容拆解成以下标签格式：
+使用以下标签，可多次使用：
+【旁白:环境或气氛描写，有叙述者声音，可以小判断小嘀咕，别端着。】
+【char_[角色名]_动作:具体的行为描写，以角色名开头，盯住细节写。】
+【char_[角色名]_语言:角色说的具体话语，不加引号。不要用"问道"、"说道"，直接用对话。】
+
+结尾汇总：
+【状态栏数值变化:user.属性:+/-数值, npc.[角色名].属性:+/-数值】
+【是否获得道具:道具名称，逗号分隔】
+
+记住：别端着。像一个会讲故事的朋友在讲，别像AI在写作文。`;
+}
+
+// ========== 解析多角色回复的函数 ==========
+// ========== 新增：动作描写主语修复函数（兜底用） ==========
+function repairActionSubject(actionText, characterName) {
+    if (!actionText || !characterName) return actionText;
+    
+    let text = actionText.trim();
+    
+    // 如果已经以角色名开头，直接返回
+    if (text.startsWith(characterName)) {
+        return text;
+    }
+    
+    // 去除开头的标点符号和空白后再检查
+    const trimmedStart = text.replace(/^[，,。；;：:\s]+/, '');
+    if (trimmedStart.startsWith(characterName)) {
+        return characterName + text.substring(text.indexOf(characterName) + characterName.length);
+    }
+    
+    // 否则在开头添加角色名
+    return characterName + text;
+}
+function parseMultiResponse(response) {
+    const blocks = [];
+    
+    // 提取完整原文
+    const fullTextMatch = response.match(/【完整原文】([\s\S]*?)(?=【结构化内容】|$)/);
+    const fullText = fullTextMatch ? fullTextMatch[1].trim() : '';
+    
+    // 提取结构化内容部分
+    const structuredMatch = response.match(/【结构化内容】([\s\S]*)/);
+    let contentBlock = structuredMatch ? structuredMatch[1].trim() : response;
+    
+    // 如果存在完整原文，添加到返回结果中
+    if (fullText) {
+        blocks.push({ type: 'fullText', content: fullText });
+    }
+
+    const tagRegex = /【([^：:]+)[：:]([^】]*)】/g;
+    let match;
+    
+    let pendingStateUpdates = { user: {}, npcs: {} };
+    let pendingItems = [];
+    let lastNpcActionName = null;
+    
+    while ((match = tagRegex.exec(contentBlock)) !== null) {
+        const tagName = match[1].trim();
+        const tagContent = match[2].trim();
+        
+        if (tagName === '旁白') {
+            blocks.push({ type: 'system', content: tagContent });
+            lastNpcActionName = null;
+        } 
+        else if (tagName.startsWith('char_')) {
+            const parts = tagName.split('_');
+            if (parts.length >= 3) {
+                const npcName = parts[1];
+                const actionType = parts[2];
+                
+                const npcExists = currentSimulator.npcs.some(n => n.name === npcName);
+                
+                if (actionType === '动作') {
+                    const repairedAction = repairActionSubject(tagContent, npcName);
+                    // 检查上一条是否同一个角色的动作，是就合并
+                    const lastBlock = blocks[blocks.length - 1];
+                    if (lastBlock && lastBlock.type === 'system' && lastNpcActionName === npcName) {
+                        lastBlock.content += '；' + repairedAction;
+                    } else {
+                        blocks.push({ type: 'system', content: repairedAction });
+                    }
+                    lastNpcActionName = npcName;
+                } else if (actionType === '语言') {
+                    lastNpcActionName = null;
+                    if (npcExists) {
+                        blocks.push({ type: 'bubble', speaker: npcName, content: tagContent });
+                    } else {
+                        blocks.push({ type: 'system', content: `【${npcName}】: ${tagContent}` });
+                    }
+                }
+            }
+        }
+        else if (tagName === '状态栏数值变化') {
+            lastNpcActionName = null;
+            const updates = tagContent.split(',').map(s => s.trim());
+            updates.forEach(update => {
+                const colonIndex = update.indexOf(':');
+                if (colonIndex === -1) return;
+                
+                const path = update.substring(0, colonIndex).trim();
+                const value = update.substring(colonIndex + 1).trim();
+                const parts = path.split('.');
+                
+                if (parts[0] === 'user' && parts.length >= 2) {
+                    const stat = parts[1];
+                    pendingStateUpdates.user[stat] = value;
+                } else if (parts[0] === 'npc' && parts.length >= 3) {
+                    const npcTargetName = parts[1];
+                    const stat = parts[2];
+                    if (!pendingStateUpdates.npcs[npcTargetName]) {
+                        pendingStateUpdates.npcs[npcTargetName] = {};
+                    }
+                    pendingStateUpdates.npcs[npcTargetName][stat] = value;
+                }
+            });
+        }
+        else if (tagName === '是否获得道具') {
+            lastNpcActionName = null;
+            pendingItems = tagContent.split(',').map(s => s.trim()).filter(s => s);
+        }
+    }
+    
+    if (Object.keys(pendingStateUpdates.user).length > 0 || Object.keys(pendingStateUpdates.npcs).length > 0 || pendingItems.length > 0) {
+        blocks.push({
+            type: 'stateUpdate',
+            updates: {
+                ...pendingStateUpdates,
+                items: pendingItems
+            },
+            sourceNpcName: '系统'
+        });
+    }
+    
+    if (blocks.length === 0 && contentBlock.length < 300 && !contentBlock.includes('【')) {
+        blocks.push({ type: 'system', content: contentBlock });
+    }
+    
+    return blocks;
+}
+    
+    /**
+     * 应用状态更新
+     */
+    function applyStateUpdates(updates, speakerName) {
+        const updateMessages = [];
+        
+        // 更新用户状态
+        if (updates.user) {
+            const userStats = currentSimulator.user.stats;
+            
+            for (const [stat, value] of Object.entries(updates.user)) {
+                // 处理可能的别名
+                let actualStat = stat;
+                const statMap = {
+                    'exp': 'exp',
+                    '经验': 'exp',
+                    'fatigue': 'fatigue',
+                    '疲惫': 'fatigue',
+                    'fame': 'fame',
+                    '声望': 'fame',
+                    'money': 'money',
+                    '金钱': 'money',
+                    'scheme': 'scheme',
+                    '心机': 'scheme',
+                    'appearance': 'appearance',
+                    '外貌': 'appearance'
+                };
+                actualStat = statMap[stat] || stat;
+                
+                if (userStats[actualStat] !== undefined) {
+                    const oldValue = userStats[actualStat];
+                    const newValue = parseStatValue(oldValue, value);
+                    userStats[actualStat] = clampStatValue(actualStat, newValue);
+                    updateMessages.push(`📊 你的${getStatLabel(actualStat)} ${formatChange(value)}`);
+                }
+            }
+        }
+        
+        // 更新NPC状态
+        if (updates.npcs) {
+            for (const [npcName, stats] of Object.entries(updates.npcs)) {
+                // 尝试匹配NPC（支持名称和ID）
+                let npc = currentSimulator.npcs.find(n => n.name === npcName);
+                if (!npc) {
+                    npc = currentSimulator.npcs.find(n => n.id === npcName);
+                }
+                if (!npc) continue;
+                
+                if (!npc.textStats) npc.textStats = {};
+                
+                for (const [stat, value] of Object.entries(stats)) {
+                    // 处理文本类属性
+                    if (stat === 'viewOnUser' || stat === '看法' || stat === 'innerVoice' || stat === '心声' || stat === 'darkThought' || stat === '坏心思') {
+                        let actualStat = stat;
+                        if (stat === '看法') actualStat = 'viewOnUser';
+                        if (stat === '心声') actualStat = 'innerVoice';
+                        if (stat === '坏心思') actualStat = 'darkThought';
+                        
+                        npc.textStats[actualStat] = String(value);
+                        
+                        if (actualStat === 'viewOnUser' && npc.name === speakerName) {
+                            updateMessages.push(`👁️ ${npcName}对你的看法已改变`);
+                        } else if (actualStat === 'innerVoice' && npc.name === speakerName) {
+                            updateMessages.push(`💭 ${npcName}的心声已更新`);
+                        } else if (actualStat === 'darkThought' && npc.name === speakerName) {
+                            updateMessages.push(`🖤 ${npcName}的坏心思已更新`);
+                        }
+                    } 
+                    // 处理数值类属性
+                    else {
+                        let actualStat = stat;
+                        const statMap = {
+                            'favor': 'favor',
+                            '好感度': 'favor',
+                            '好感': 'favor',
+                            'desire': 'desire',
+                            '欲望': 'desire',
+                            '欲望值': 'desire',
+                            'fame': 'fame',
+                            '声望': 'fame',
+                            'money': 'money',
+                            '金钱': 'money',
+                            'exp': 'exp',
+                            '经验': 'exp'
+                        };
+                        actualStat = statMap[stat] || stat;
+                        
+                        if (npc.stats[actualStat] !== undefined) {
+                            const oldValue = npc.stats[actualStat];
+                            const newValue = parseStatValue(oldValue, value);
+                            npc.stats[actualStat] = clampStatValue(actualStat, newValue);
+                            updateMessages.push(`📊 ${npcName}的${getNpcStatLabel(actualStat)} ${formatChange(value)}`);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 处理道具获得
+        if (updates.items && updates.items.length > 0) {
+            updates.items.forEach(itemName => {
+                addItemToInventory(itemName, `从${speakerName}处获得`);
+            });
+        }
+        
+        updateMessages.forEach(msg => addSystemMessage(msg));
+        refreshOpenStatusModal();
+    }
+    
+    /**
+     * 解析数值变化：支持 +5, -3, =10 或直接 10
+     */
+    function parseStatValue(oldValue, valueStr) {
+        valueStr = String(valueStr).trim();
+        
+        if (valueStr.startsWith('+')) {
+            return oldValue + (parseFloat(valueStr.substring(1)) || 0);
+        } else if (valueStr.startsWith('-')) {
+            return oldValue - (parseFloat(valueStr.substring(1)) || 0);
+        } else if (valueStr.startsWith('=')) {
+            return parseFloat(valueStr.substring(1)) || 0;
+        } else {
+            const num = parseFloat(valueStr);
+            return isNaN(num) ? oldValue : num;
+        }
+    }
+    
+    /**
+     * 限制数值在合理范围内
+     */
+    function clampStatValue(stat, value) {
+        const ranges = {
+            favor: [0, 100],
+            desire: [0, 100],
+            appearance: [0, 100],
+            fatigue: [0, 100],
+            fame: [0, 9999],
+            scheme: [0, 100],
+            exp: [0, 9999]
+        };
+        
+        const range = ranges[stat];
+        if (range) {
+            return Math.max(range[0], Math.min(range[1], value));
+        }
+        return Math.max(0, value);
+    }
+    
+    /**
+     * 格式化变化显示
+     */
+    function formatChange(valueStr) {
+        valueStr = String(valueStr).trim();
+        if (valueStr.startsWith('+')) return `↑ ${valueStr.substring(1)}`;
+        if (valueStr.startsWith('-')) return `↓ ${valueStr.substring(1)}`;
+        if (valueStr.startsWith('=')) return `→ ${valueStr.substring(1)}`;
+        return `→ ${valueStr}`;
+    }
+    
+    /**
+     * 刷新当前打开的状态弹窗
+     */
+    function refreshOpenStatusModal() {
+        const modal = document.getElementById('statusModal');
+        if (!modal.classList.contains('active')) return;
+        
+        const content = document.getElementById('statusCardContent');
+        const h3 = content.querySelector('h3');
+        if (!h3) return;
+        
+        const nameMatch = h3.textContent.match(/[👤👥]\s*(.+)/);
+        if (nameMatch) {
+            const name = nameMatch[1].trim();
+            showStatus(name);
+        }
+    }
+    
+    // ========== 道具系统函数 ==========
+
+    // 添加道具到仓库
+    function addItemToInventory(itemName, source) {
+        if (!currentSimulator.items) currentSimulator.items = [];
+        
+        const existingItem = currentSimulator.items.find(i => i.name === itemName);
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+            addSystemMessage(`📦 获得 ${itemName} x1（现有 ${existingItem.quantity} 个）`);
+        } else {
+            currentSimulator.items.push({
+                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                name: itemName,
+                effect: '未知效果',
+                obtainWay: source,
+                quantity: 1
+            });
+            addSystemMessage(`📦 获得新道具：${itemName}`);
+        }
+        saveSimulators();
+    }
+
+    // 打开道具仓库
+    function openItemsModal() {
+        const modal = document.getElementById('itemsModal');
+        renderItemsList();
+        modal.classList.add('active');
+    }
+
+    // 渲染道具列表
+    function renderItemsList() {
+        const listContainer = document.getElementById('itemsList');
+        const items = currentSimulator.items || [];
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">暂无道具</div>';
+            document.getElementById('itemsDetail').innerHTML = '<div class="items-detail-empty">👈 选择道具查看详情</div>';
+            return;
+        }
+        
+        listContainer.innerHTML = items.map((item, idx) => `
+            <div class="item-list-item ${currentSelectedItem?.id === item.id ? 'selected' : ''}" data-item-id="${item.id}">
+                <div class="item-name">${escapeHtml(item.name)}</div>
+                <div class="item-quantity">x${item.quantity || 1}</div>
+            </div>
+        `).join('');
+        
+        listContainer.querySelectorAll('.item-list-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const itemId = el.dataset.itemId;
+                selectItem(itemId);
+            });
+        });
+        
+        // 默认选中第一个或保持选中状态
+        if (currentSelectedItem) {
+            const stillExists = items.find(i => i.id === currentSelectedItem.id);
+            if (stillExists) {
+                renderItemDetail(stillExists);
+            } else {
+                currentSelectedItem = items[0] || null;
+                if (currentSelectedItem) renderItemDetail(currentSelectedItem);
+            }
+        } else if (items.length > 0) {
+            currentSelectedItem = items[0];
+            renderItemDetail(items[0]);
+        }
+    }
+
+    // 选中道具
+    function selectItem(itemId) {
+        const items = currentSimulator.items || [];
+        const item = items.find(i => i.id === itemId);
+        if (item) {
+            currentSelectedItem = item;
+            renderItemsList();
+            renderItemDetail(item);
+        }
+    }
+
+    // 渲染道具详情
+    function renderItemDetail(item) {
+        const container = document.getElementById('itemsDetail');
+        container.innerHTML = `
+            <div class="items-detail-content">
+                <div class="item-detail-name">${escapeHtml(item.name)}</div>
+                <div class="item-detail-field">
+                    <label>✨ 效果</label>
+                    <p>${escapeHtml(item.effect || '未知效果')}</p>
+                </div>
+                <div class="item-detail-field">
+                    <label>📌 获得方式</label>
+                    <p>${escapeHtml(item.obtainWay || '未知')}</p>
+                </div>
+                <div class="item-detail-field">
+                    <label>📦 数量</label>
+                    <p>${item.quantity || 1}</p>
+                </div>
+            </div>
+            <div class="items-actions">
+                <button class="item-action-btn use" data-action="use" ${item.quantity <= 0 ? 'disabled' : ''}>✨ 使用</button>
+                <button class="item-action-btn give" data-action="give" ${item.quantity <= 0 ? 'disabled' : ''}>🎁 赠送</button>
+                <button class="item-action-btn discard" data-action="discard" ${item.quantity <= 0 ? 'disabled' : ''}>🗑️ 丢弃</button>
+            </div>
+        `;
+        
+        container.querySelectorAll('.item-action-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                handleItemAction(item, action);
+            });
+        });
+    }
+
+    // 处理道具操作
+    function handleItemAction(item, action) {
+        if (action === 'discard') {
+            if (confirm(`确定丢弃 ${item.name} 吗？`)) {
+                removeItem(item.id, 1);
+                addSystemMessage(`🗑️ 你丢弃了 ${item.name}`);
+                closeItemsModal();
+            }
+        } else if (action === 'use') {
+            pendingItemAction = { item, action: 'use' };
+            showTargetModal('选择使用对象', item);
+        } else if (action === 'give') {
+            pendingItemAction = { item, action: 'give' };
+            showTargetModal('选择赠送对象', item);
+        }
+    }
+
+    // 显示目标选择模态框
+    function showTargetModal(title, item) {
+        const modal = document.getElementById('itemTargetModal');
+        const titleEl = document.getElementById('targetModalTitle');
+        const listContainer = document.getElementById('targetList');
+        
+        titleEl.textContent = `${title}：${item.name}`;
+        
+        const npcs = currentSimulator.npcs || [];
+        const userName = currentSimulator.user.name;
+        
+        let targets = [
+            { type: 'user', name: userName, role: '自己', avatar: userName.charAt(0) }
+        ];
+        
+        npcs.forEach(npc => {
+            targets.push({
+                type: 'npc',
+                name: npc.name,
+                role: npc.role || '未知',
+                avatar: npc.name.charAt(0)
+            });
+        });
+        
+        listContainer.innerHTML = targets.map(t => `
+            <div class="target-item" data-target-type="${t.type}" data-target-name="${t.name}">
+                <div class="target-avatar">${escapeHtml(t.avatar)}</div>
+                <div class="target-info">
+                    <div class="target-name">${escapeHtml(t.name)}</div>
+                    <div class="target-role">${escapeHtml(t.role)}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        listContainer.querySelectorAll('.target-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const targetType = el.dataset.targetType;
+                const targetName = el.dataset.targetName;
+                executeItemAction(targetType, targetName);
+            });
+        });
+        
+        modal.classList.add('active');
+        
+        document.getElementById('cancelTargetBtn').onclick = () => {
+            modal.classList.remove('active');
+            pendingItemAction = null;
+        };
+        
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                pendingItemAction = null;
+            }
+        };
+    }
+
+    // 执行道具操作
+    function executeItemAction(targetType, targetName) {
+        if (!pendingItemAction) return;
+        
+        const { item, action } = pendingItemAction;
+        const modal = document.getElementById('itemTargetModal');
+        
+        let message = '';
+        if (action === 'use') {
+            if (targetType === 'user') {
+                message = `✨ 你对${targetName}使用了 ${item.name}`;
+            } else {
+                message = `✨ 你对 ${targetName} 使用了 ${item.name}`;
+            }
+        } else if (action === 'give') {
+            if (targetType === 'user') {
+                message = `🎁 你把 ${item.name} 留给了自己`;
+            } else {
+                message = `🎁 你把 ${item.name} 赠送给了 ${targetName}`;
+                // 赠送可能影响好感度
+                const npc = currentSimulator.npcs.find(n => n.name === targetName);
+                if (npc) {
+                    npc.stats.favor = Math.min(100, (npc.stats.favor || 50) + 5);
+                    message += `，${targetName}的好感度提升了`;
+                }
+            }
+        }
+        
+        addBubbleMessage(currentSimulator.user.name, message);
+        removeItem(item.id, 1);
+        
+        modal.classList.remove('active');
+        pendingItemAction = null;
+        closeItemsModal();
+        saveSimulators();
+    }
+
+    // 移除道具
+    function removeItem(itemId, count = 1) {
+        const items = currentSimulator.items || [];
+        const index = items.findIndex(i => i.id === itemId);
+        if (index === -1) return false;
+        
+        const item = items[index];
+        item.quantity = (item.quantity || 1) - count;
+        
+        if (item.quantity <= 0) {
+            items.splice(index, 1);
+            if (currentSelectedItem?.id === itemId) {
+                currentSelectedItem = items[0] || null;
+            }
+        }
+        
+        saveSimulators();
+        return true;
+    }
+
+    // 关闭道具仓库
+    function closeItemsModal() {
+        document.getElementById('itemsModal').classList.remove('active');
+        currentSelectedItem = null;
+    }
+    
+    function switchPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id+'Page').classList.add('active');
+        if (id==='home') renderHome();
+        if (id==='apiConfig') {
+            if (document.getElementById('apiConfigContainer').children.length === 0) {
+                renderApiConfigPage();
+            }
+        }
+        if (id==='beautyConfig') {
+            renderBeautyConfigPage();
+        }
+        if (id==='settingsList') {
+            // 设置列表页无需特殊渲染
+        }
+    }
+
+    function openSaveModal() {
+        const modal = document.getElementById('saveLoadModal');
+        const content = document.getElementById('saveLoadContent');
+        content.innerHTML = `<h3>💾 保存进度</h3>
+            <input type="text" id="saveNameInput" placeholder="存档名称" value="存档 ${new Date().toLocaleTimeString()}">
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="cancelSaveLoad">取消</button>
+                <button class="modal-btn primary" id="confirmSave">保存</button>
+            </div>`;
+        modal.classList.add('active');
+        document.getElementById('cancelSaveLoad').onclick = () => modal.classList.remove('active');
+        document.getElementById('confirmSave').onclick = () => {
+            const name = document.getElementById('saveNameInput').value.trim() || '未命名存档';
+            currentSimulator.saves = currentSimulator.saves || [];
+            const save = {
+                name, timestamp: Date.now(),
+                gameTime: {...currentSimulator.gameTime},
+                actionPoints: currentSimulator.actionPoints,
+                messages: [...currentSimulator.messages],
+                userStats: {...currentSimulator.user.stats},
+                npcs: JSON.parse(JSON.stringify(currentSimulator.npcs))
+            };
+            currentSimulator.saves.push(save);
+            saveSimulators();
+            addSystemMessage(`💾 已存档: ${name}`);
+            modal.classList.remove('active');
+        };
+    }
+
+    function openLoadModal() {
+        const modal = document.getElementById('saveLoadModal');
+        const content = document.getElementById('saveLoadContent');
+        const saves = currentSimulator.saves || [];
+        let html = `<h3>📂 读取存档</h3>`;
+        if (saves.length === 0) html += `<p style="text-align:center; color:#888;">暂无存档</p>`;
+        else {
+            saves.forEach((s, idx) => {
+                html += `<div class="save-item">
+                    <div class="save-item-info"><strong>${escapeHtml(s.name)}</strong><span>${new Date(s.timestamp).toLocaleString()}</span></div>
+                    <div><button class="load-save-btn" data-idx="${idx}">📂</button><button class="delete-save-btn" data-idx="${idx}">✕</button></div>
+                </div>`;
+            });
+        }
+        html += `<div class="modal-actions"><button class="modal-btn secondary" id="cancelSaveLoad">关闭</button></div>`;
+        content.innerHTML = html;
+        modal.classList.add('active');
+        document.getElementById('cancelSaveLoad').onclick = () => modal.classList.remove('active');
+        content.querySelectorAll('.load-save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const save = saves[parseInt(btn.dataset.idx)];
+                currentSimulator.messages = [...save.messages];
+                currentSimulator.gameTime = {...save.gameTime};
+                currentSimulator.actionPoints = save.actionPoints;
+                if (save.userStats) currentSimulator.user.stats = {...save.userStats};
+                if (save.npcs) currentSimulator.npcs = JSON.parse(JSON.stringify(save.npcs));
+                renderPlayPage();
+                addSystemMessage(`📖 读档: ${save.name}`);
+                modal.classList.remove('active');
+                saveSimulators();
+            });
+        });
+        content.querySelectorAll('.delete-save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                currentSimulator.saves.splice(idx, 1);
+                saveSimulators();
+                openLoadModal(); 
+            });
+        });
+    }
+
+    function bindEvents() {
+        document.getElementById('enterAppIcon').onclick = () => simulators.length ? enterSimulator(simulators[0].id) : startNewSimulator();
+        document.getElementById('newSimBtn').onclick = startNewSimulator;
+        document.getElementById('backFromEditor').onclick = () => { if(confirm('返回？')) switchPage('home'); };
+        document.getElementById('deleteSimBtn').onclick = deleteSimulator;  // ← 新增这一行
+        document.getElementById('exitPlayBtn').onclick = () => { 
+    saveSimulators();
+    switchPage('home'); 
+};
+        document.getElementById('timeSettingsBtn').onclick = () => document.getElementById('timeSettingsPanel').classList.toggle('active');
+        document.getElementById('advanceTimeBtn').onclick = advanceTime;
+        document.querySelectorAll('.input-tab').forEach(t => t.onclick = function(){
+            document.querySelectorAll('.input-tab').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+            inputMode = this.dataset.mode;
+            document.getElementById('messageInput').placeholder = inputMode==='say' ? '输入对话...' : '输入旁白...';
+        });
+        document.getElementById('sendBtn').onclick = handleSend;
+        document.getElementById('getAIReplyBtn').onclick = getAIReply;
+        document.getElementById('extraActionBtn').onclick = function() {
+            openItemsModal();
+        };
+        document.getElementById('messageInput').onkeypress = e => { if(e.key==='Enter') handleSend(); };
+        document.getElementById('openSaveModalBtn').onclick = openSaveModal;
+        document.getElementById('openLoadModalBtn').onclick = openLoadModal;
+        
+        document.getElementById('openSettingsBtn').onclick = function() {
+            switchPage('settingsList');
+        };
+        
+        document.getElementById('backFromApiConfig').onclick = function() {
+            switchPage('settingsList');
+        };
+        
+        // 设置列表页返回按钮
+        document.getElementById('backFromSettingsList').onclick = function() {
+            switchPage('home');
+        };
+        
+        // 跳转 API 配置
+        document.getElementById('goApiConfigBtn').onclick = function() {
+            if (document.getElementById('apiConfigContainer').children.length === 0) {
+                renderApiConfigPage();
+            }
+            switchPage('apiConfig');
+        };
+        
+        // 跳转美化设置
+        document.getElementById('goBeautyConfigBtn').onclick = function() {
+            // 初始化临时变量为已保存的值
+            const saved = getSavedBackgrounds();
+            tempHomeBg = saved.homeBg;
+            tempPlayBg = saved.playBg;
+            switchPage('beautyConfig');
+        };
+        
+        document.getElementById('cancelRelationBtn').onclick = () => {
+            document.getElementById('relationModal').classList.remove('active');
+            pendingRelation = null;
+        };
+        document.getElementById('saveRelationBtn').onclick = () => {
+            const desc = document.getElementById('relationDescInput').value.trim() || '认识';
+            if (pendingRelation) {
+                const exists = tempSimData.relations.some(r => 
+                    (r.from===pendingRelation.from && r.to===pendingRelation.to) ||
+                    (r.from===pendingRelation.to && r.to===pendingRelation.from)
+                );
+                if (!exists) tempSimData.relations.push({ from: pendingRelation.from, to: pendingRelation.to, desc });
+                renderRelationLines();
+            }
+            document.getElementById('relationModal').classList.remove('active');
+            pendingRelation = null;
+        };
+        
+        document.getElementById('cancelEditRelationBtn').onclick = () => {
+            document.getElementById('editRelationModal').classList.remove('active');
+            editingRelationIndex = -1;
+        };
+        document.getElementById('saveEditRelationBtn').onclick = () => {
+            const desc = document.getElementById('editRelationDescInput').value.trim();
+            if (desc && editingRelationIndex >= 0) {
+                tempSimData.relations[editingRelationIndex].desc = desc;
+                renderRelationLines();
+            }
+            document.getElementById('editRelationModal').classList.remove('active');
+            editingRelationIndex = -1;
+        };
+        
+        document.getElementById('editRelationModal').onclick = e => { if(e.target === document.getElementById('editRelationModal')) document.getElementById('editRelationModal').classList.remove('active'); };
+    
+    // 气泡菜单事件
+const bubbleMenu = document.getElementById('bubbleMenu');
+
+bubbleMenu.querySelector('[data-action="rewind"]').onclick = () => {
+    if (currentBubbleMenuTarget) {
+        rewindFromMessage(currentBubbleMenuTarget.index);
+    }
+    bubbleMenu.classList.remove('active');
+};
+
+bubbleMenu.querySelector('[data-action="delete"]').onclick = () => {
+    if (currentBubbleMenuTarget) {
+        deleteSingleMessage(currentBubbleMenuTarget.index);
+    }
+    bubbleMenu.classList.remove('active');
+};
+
+bubbleMenu.querySelector('[data-action="multiSelect"]').onclick = () => {
+    if (currentBubbleMenuTarget) {
+        enterMultiSelectMode(currentBubbleMenuTarget.index);
+    }
+    bubbleMenu.classList.remove('active');
+};
+
+bubbleMenu.querySelector('[data-action="edit"]').onclick = () => {
+    if (currentBubbleMenuTarget) {
+        editMessage(currentBubbleMenuTarget.index);
+    }
+    bubbleMenu.classList.remove('active');
+};
+
+bubbleMenu.querySelector('[data-action="viewFullText"]').onclick = () => {
+    if (currentBubbleMenuTarget) {
+        const message = currentSimulator.messages[currentBubbleMenuTarget.index];
+        if (message && message.fullText) {
+            document.getElementById('fulltextBody').textContent = message.fullText;
+            document.getElementById('fulltextModal').classList.add('active');
+        } else {
+            addSystemMessage('⚠️ 该消息没有关联的完整原文');
+        }
+    }
+    bubbleMenu.classList.remove('active');
+};
+
+document.getElementById('cancelMultiSelectBtn').onclick = exitMultiSelectMode;
+    document.getElementById('confirmMultiDeleteBtn').onclick = deleteSelectedMessages;
+    
+    // 道具仓库关闭事件
+    document.getElementById('closeItemsModal').onclick = closeItemsModal;
+    document.getElementById('itemsModal').onclick = (e) => {
+        if (e.target === document.getElementById('itemsModal')) {
+            closeItemsModal();
+        }
+    };
+    
+    var fulltextModal = document.getElementById('fulltextModal');
+var closeFulltextBtn = document.getElementById('closeFulltextModal');
+if (closeFulltextBtn) {
+    closeFulltextBtn.addEventListener('click', function() {
+        fulltextModal.classList.remove('active');
+    });
+}
+if (fulltextModal) {
+    fulltextModal.addEventListener('click', function(e) {
+        if (e.target === fulltextModal) {
+            fulltextModal.classList.remove('active');
+        }
+    });
+}
+    
+    document.addEventListener('click', (e) => {
+        if (!bubbleMenu.contains(e.target)) {
+            bubbleMenu.classList.remove('active');
+        }
+    });
+    
+    // 绑定美化设置页事件
+    bindBeautyConfigEvents();
+}
+    
+    // ========== 美化设置功能 ==========
+    const BEAUTY_STORAGE_KEYS = {
+        homeBg: 'mylife_home_bg',
+        playBg: 'mylife_play_bg'
+    };
+
+    // 临时存储（未保存前）
+    let tempHomeBg = null;
+    let tempPlayBg = null;
+
+    // 读取已保存的背景
+    function getSavedBackgrounds() {
+        return {
+            homeBg: localStorage.getItem(BEAUTY_STORAGE_KEYS.homeBg) || null,
+            playBg: localStorage.getItem(BEAUTY_STORAGE_KEYS.playBg) || null
+        };
+    }
+
+    // 应用已保存的背景到页面
+    function applyBackgrounds() {
+        const saved = getSavedBackgrounds();
+        const homePage = document.getElementById('homePage');
+        const playPage = document.getElementById('playPage');
+
+        if (saved.homeBg) {
+            homePage.style.backgroundImage = 'url(' + saved.homeBg + ')';
+            homePage.style.backgroundSize = 'cover';
+            homePage.style.backgroundPosition = 'center';
+            homePage.style.backgroundRepeat = 'no-repeat';
+        } else {
+            homePage.style.backgroundImage = '';
+            homePage.style.backgroundSize = '';
+            homePage.style.backgroundPosition = '';
+            homePage.style.backgroundRepeat = '';
+        }
+
+        if (saved.playBg) {
+            playPage.style.backgroundImage = 'url(' + saved.playBg + ')';
+            playPage.style.backgroundSize = 'cover';
+            playPage.style.backgroundPosition = 'center';
+            playPage.style.backgroundRepeat = 'no-repeat';
+        } else {
+            playPage.style.backgroundImage = '';
+            playPage.style.backgroundSize = '';
+            playPage.style.backgroundPosition = '';
+            playPage.style.backgroundRepeat = '';
+        }
+    }
+
+    // 渲染美化设置页
+    function renderBeautyConfigPage() {
+        const saved = getSavedBackgrounds();
+
+        // 读取已保存的或使用默认状态
+        if (tempHomeBg === null) {
+            tempHomeBg = saved.homeBg;
+        }
+        if (tempPlayBg === null) {
+            tempPlayBg = saved.playBg;
+        }
+
+        // 更新预览
+        updateBeautyPreview('homeBgPreview', tempHomeBg, '🏠');
+        updateBeautyPreview('playBgPreview', tempPlayBg, '🎮');
+    }
+
+    // 更新预览区域
+    function updateBeautyPreview(elementId, bgData, fallbackEmoji) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        if (bgData) {
+            el.style.backgroundImage = 'url(' + bgData + ')';
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+            el.textContent = '';
+        } else {
+            el.style.backgroundImage = '';
+            el.style.backgroundSize = '';
+            el.style.backgroundPosition = '';
+            el.textContent = fallbackEmoji + ' 默认背景';
+        }
+    }
+
+    // 处理图片选择
+    function handleImageSelect(fileInput, targetTempKey) {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        // 检查文件类型
+        if (!file.type.startsWith('image/')) {
+            alert('请选择图片文件');
+            fileInput.value = '';
+            return;
+        }
+
+        // 检查文件大小（限制10MB）
+        if (file.size > 10 * 1024 * 1024) {
+            alert('图片大小不能超过10MB');
+            fileInput.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            if (targetTempKey === 'homeBg') {
+                tempHomeBg = base64;
+                updateBeautyPreview('homeBgPreview', base64, '🏠');
+            } else if (targetTempKey === 'playBg') {
+                tempPlayBg = base64;
+                updateBeautyPreview('playBgPreview', base64, '🎮');
+            }
+            document.getElementById('beautyStatusMsg').innerHTML = '📷 图片已选择，点击"保存设置"生效';
+            document.getElementById('beautyStatusMsg').className = 'api-status-msg warning';
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = '';
+    }
+
+    // 重置单个背景（仅预览，未保存）
+    function resetSingleBgPreview(targetKey) {
+        if (targetKey === 'homeBg') {
+            tempHomeBg = null;
+            updateBeautyPreview('homeBgPreview', null, '🏠');
+        } else if (targetKey === 'playBg') {
+            tempPlayBg = null;
+            updateBeautyPreview('playBgPreview', null, '🎮');
+        }
+        document.getElementById('beautyStatusMsg').innerHTML = '🔄 已重置预览，点击"保存设置"生效';
+        document.getElementById('beautyStatusMsg').className = 'api-status-msg warning';
+    }
+
+    // 保存所有美化设置
+    function saveBeautySettings() {
+        if (tempHomeBg !== null && tempHomeBg !== undefined) {
+            if (tempHomeBg) {
+                localStorage.setItem(BEAUTY_STORAGE_KEYS.homeBg, tempHomeBg);
+            } else {
+                localStorage.removeItem(BEAUTY_STORAGE_KEYS.homeBg);
+            }
+        }
+
+        if (tempPlayBg !== null && tempPlayBg !== undefined) {
+            if (tempPlayBg) {
+                localStorage.setItem(BEAUTY_STORAGE_KEYS.playBg, tempPlayBg);
+            } else {
+                localStorage.removeItem(BEAUTY_STORAGE_KEYS.playBg);
+            }
+        }
+
+        // 立即应用到页面
+        applyBackgrounds();
+
+        document.getElementById('beautyStatusMsg').innerHTML = '✅ 美化设置已保存并应用';
+        document.getElementById('beautyStatusMsg').className = 'api-status-msg success';
+    }
+
+    // 清除所有背景
+    function resetAllBeautySettings() {
+        if (!confirm('确定清除所有背景设置吗？此操作不可恢复。')) return;
+
+        tempHomeBg = null;
+        tempPlayBg = null;
+        localStorage.removeItem(BEAUTY_STORAGE_KEYS.homeBg);
+        localStorage.removeItem(BEAUTY_STORAGE_KEYS.playBg);
+
+        updateBeautyPreview('homeBgPreview', null, '🏠');
+        updateBeautyPreview('playBgPreview', null, '🎮');
+        applyBackgrounds();
+
+        document.getElementById('beautyStatusMsg').innerHTML = '🗑️ 所有背景已清除';
+        document.getElementById('beautyStatusMsg').className = 'api-status-msg';
+    }
+
+    // 绑定美化设置页事件
+    function bindBeautyConfigEvents() {
+        // 返回按钮
+        document.getElementById('backFromBeautyConfig').onclick = function() {
+            // 取消时恢复为已保存的状态
+            const saved = getSavedBackgrounds();
+            tempHomeBg = saved.homeBg;
+            tempPlayBg = saved.playBg;
+            switchPage('settingsList');
+        };
+
+        // 首页背景选择
+        document.getElementById('homeBgInput').addEventListener('change', function() {
+            handleImageSelect(this, 'homeBg');
+        });
+
+        // 游玩页背景选择
+        document.getElementById('playBgInput').addEventListener('change', function() {
+            handleImageSelect(this, 'playBg');
+        });
+
+        // 重置首页背景预览
+        document.getElementById('resetHomeBgBtn').onclick = function() {
+            resetSingleBgPreview('homeBg');
+        };
+
+        // 重置游玩页背景预览
+        document.getElementById('resetPlayBgBtn').onclick = function() {
+            resetSingleBgPreview('playBg');
+        };
+
+        // 保存按钮
+        document.getElementById('saveBeautyBtn').onclick = function() {
+            saveBeautySettings();
+        };
+
+        // 清除所有按钮
+        document.getElementById('resetAllBeautyBtn').onclick = function() {
+            resetAllBeautySettings();
+        };
+    }
+    
+    loadSimulators();
+    initAIServiceFromStorage();
+    renderHome();
+    bindEvents();
+    
+    // 初始化时应用已保存的背景
+    applyBackgrounds();
+    
+    window.MylifeAI = AIService;
+})();
+</script>
+<div class="api-toast" id="apiToast"></div>
+
+</body>
+</html>
