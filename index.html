@@ -2222,43 +2222,38 @@ const sceneKeywords = preset?.sceneKeywords || ['洞府', '大殿', '密室', '�
         });
         
         document.getElementById('fetchModelsBtn')?.addEventListener('click', async () => {
-            const baseUrl = document.getElementById('apiBaseUrl').value.trim();
-            const apiKey = document.getElementById('apiKey').value.trim();
-            const statusEl = document.getElementById('apiStatusMsg');
-            
-            if (!baseUrl || !apiKey) {
-                statusEl.innerHTML = '❌ Base URL 和 API Key 不能为空';
-                statusEl.className = 'api-status-msg error';
-                return;
-            }
-            statusEl.innerHTML = '📡 正在拉取模型列表...';
-            statusEl.className = 'api-status-msg';
-            
-            try {
-                const cleanBase = baseUrl.replace(/\/+$/, '');
-                const response = await fetch(`${cleanBase}/models`, {
-                    headers: { 'Authorization': `Bearer ${apiKey}` }
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            function renderPlayPage() {
-    if (!currentSimulator) return;
-    const t = currentSimulator.gameTime;
-    document.getElementById('timeDisplay').textContent = `${t.year}年${t.month}月${t.day}日 ${t.hour}时`;
-    updateTokenDisplay();
-    renderEventStream();
-};
-                const models = (data.data || []).map(m => m.id).filter(id => id && !id.includes('dall-e') && !id.includes('whisper') && !id.includes('tts')).sort();
-                setModelsCache(models);
-                
-                const select = document.getElementById('modelSelect');
-                select.innerHTML = models.map(m => `<option>${escapeHtml(m)}</option>`).join('');
-                statusEl.innerHTML = `✅ 成功拉取 ${models.length} 个模型`;
-                statusEl.className = 'api-status-msg success';
-            } catch (e) {
-                statusEl.innerHTML = `❌ 拉取失败: ${e.message}`;
-                statusEl.className = 'api-status-msg error';
-            }
+    const baseUrl = document.getElementById('apiBaseUrl').value.trim();
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const statusEl = document.getElementById('apiStatusMsg');
+    
+    if (!baseUrl || !apiKey) {
+        statusEl.innerHTML = '❌ Base URL 和 API Key 不能为空';
+        statusEl.className = 'api-status-msg error';
+        return;
+    }
+    statusEl.innerHTML = '📡 正在拉取模型列表...';
+    statusEl.className = 'api-status-msg';
+    
+    try {
+        const cleanBase = baseUrl.replace(/\/+$/, '');
+        const response = await fetch(`${cleanBase}/models`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        const models = (data.data || []).map(m => m.id).filter(id => id && !id.includes('dall-e') && !id.includes('whisper') && !id.includes('tts')).sort();
+        setModelsCache(models);
+        
+        const select = document.getElementById('modelSelect');
+        select.innerHTML = models.map(m => `<option>${escapeHtml(m)}</option>`).join('');
+        statusEl.innerHTML = `✅ 成功拉取 ${models.length} 个模型`;
+        statusEl.className = 'api-status-msg success';
+    } catch (e) {
+        statusEl.innerHTML = `❌ 拉取失败: ${e.message}`;
+        statusEl.className = 'api-status-msg error';
+    }
+});
         
         document.getElementById('testApiBtn')?.addEventListener('click', async () => {
             const baseUrl = document.getElementById('apiBaseUrl').value.trim();
